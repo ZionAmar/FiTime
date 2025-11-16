@@ -16,6 +16,15 @@ const updateRegistrationStatus = (registrationId, status) => {
     return db.query(query, [status, registrationId]);
 };
 
+const updatePendingStatus = (registrationId) => {
+    const query = `UPDATE meeting_registrations SET 
+        status = 'pending', 
+        pending_sent_at = NOW(), 
+        notification_retries = 1 
+        WHERE id = ?`;
+    return db.query(query, [registrationId]);
+};
+
 const setCheckInTime = (registrationId) => {
     const query = 'UPDATE meeting_registrations SET status = \'checked_in\', check_in_time = NOW() WHERE id = ?';
     return db.query(query, [registrationId]);
@@ -103,11 +112,32 @@ WHERE id = ?`;
     return dbOrConn.query(query, [status, membershipId, registrationId]);
 };
 
+const findStalePendingRegistrations = (hours) => {
+    const query = `
+        SELECT mr.*, u.phone, u.full_name
+        FROM meeting_registrations mr
+        JOIN users u ON mr.user_id = u.id
+        WHERE mr.status = 'pending'
+          AND mr.pending_sent_at IS NOT NULL
+          AND mr.pending_sent_at < NOW() - INTERVAL ? HOUR
+    `;
+    return db.query(query, [hours]);
+};
+
+const updateRetryTimestamp = (registrationId) => {
+    const query = `UPDATE meeting_registrations SET
+        pending_sent_at = NOW(),
+        notification_retries = notification_retries + 1
+        WHERE id = ?`;
+    return db.query(query, [registrationId]);
+};
+
 
 module.exports = {
     findExisting,
     add,
     updateRegistrationStatus,
+    updatePendingStatus, 
     setCheckInTime, 
     getRegistrationById,
     getNextInWaitingList,
@@ -118,5 +148,7 @@ module.exports = {
     decrementMeetingCount,
     getMembershipById,
     incrementVisit,
-    updateRegistrationStatusAndMembership
+    updateRegistrationStatusAndMembership,
+    findStalePendingRegistrations,
+    updateRetryTimestamp
 };

@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const path = require("path");
 const errorHandler = require("./middlewares/errorHandler");
 const cors = require("cors");
-
+const participantService = require('./services/participant_S'); // 1. ודא שהסרוויס מיובא
 dotenv.config();
 
 const app = express();
@@ -29,7 +29,7 @@ app.get('*', (req, res) => {
 
 
 app.use(errorHandler);
-
+participantService.startWaitingListCronJob();
 app.listen(PORT, () => {
   console.log(`✅ EasyFit server is running at http://localhost:${PORT}`);
 });

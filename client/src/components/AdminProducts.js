@@ -184,7 +184,7 @@ function AdminProducts() {
                     {isLoading && <p>טוען...</p>}
                     {!isLoading && (
                         <div className="admin-table-container"> 
-                            <table className="admin-table">
+                            <table className="admin-table" border={1}>
                                 <thead>
                                     <tr>
                                         <th>שם המנוי/כרטיסייה</th>
