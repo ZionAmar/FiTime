@@ -98,6 +98,7 @@ function Navbar() {
                         <NavLink to="/dashboard" className="nav-link" onClick={closeMenu}>דשבורד</NavLink>
                         <NavLink to="/schedule" className="nav-link" onClick={closeMenu}>לוח שיעורים</NavLink>
                         <NavLink to="/history" className="nav-link" onClick={closeMenu}>היסטוריה</NavLink>
+                        <NavLink to="/my-memberships" className="nav-link" onClick={closeMenu}>המנוי שלי</NavLink>
                     </>
                 );
         }

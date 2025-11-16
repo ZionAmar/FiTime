@@ -11,6 +11,7 @@ const breadcrumbNameMap = {
   'manage/schedule': 'ניהול לו"ז',
   'trainer-history': 'היסטוריה',
   'owner-dashboard': 'דשבורד ניהול',
+  'my-memberships': 'המנוי שלי',
 };
 
 function Breadcrumbs() {

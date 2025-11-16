@@ -18,6 +18,7 @@ import BookingErrorPage from './pages/BookingErrorPage';
 import OwnerDashboardPage from './pages/OwnerDashboardPage';
 import ForgotPassword from './pages/ForgotPassword'; 
 import ResetPassword from './pages/ResetPassword'; 
+import MyMembershipsPage from './pages/MyMembershipsPage'; // <-- הוסף את השורה הזו
 import './App.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -47,6 +48,7 @@ const AppRoutes = () => {
                     <Route path="/schedule" element={<SchedulePage />} />
                     <Route path="/history" element={<MemberHistoryPage />} />
                     <Route path="/trainer-history" element={<TrainerHistoryPage />} />
+                    <Route path="/my-memberships" element={<MyMembershipsPage />} />
                 </Route>
                 <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                     <Route path="/manage/schedule" element={<ManageSchedulePage />} />

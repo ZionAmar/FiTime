@@ -1,0 +1,97 @@
+.my-memberships-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.page-header h1 {
+    margin: 0;
+}
+
+.page-header p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-top: 0.5rem;
+}
+
+.memberships-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.membership-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.membership-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.membership-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.membership-card-header h3 {
+    margin: 0;
+    color: var(--primary-color, #007bff);
+}
+
+.membership-card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.membership-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+}
+
+.membership-stat strong {
+    color: #333;
+}
+
+.membership-stat span {
+    color: #555;
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background-color: #e0f8e9;
+    color: #1a7431;
+}
+.status-badge.expired,
+.status-badge.depleted {
+    background-color: #fdecec;
+    color: #a91e2c;
+}
+.status-badge.pending {
+    background-color: #fff8e1;
+    color: #b28000;
+}
