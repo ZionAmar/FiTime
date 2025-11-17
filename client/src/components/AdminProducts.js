@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api'; 
 import ConfirmModal from './ConfirmModal';
-import '../styles/AdminProducts.css'; // FIX: ייבוא קובץ ה-CSS הייעודי
+import '../styles/AdminProducts.css';
 
 function AdminProducts() {
     const [products, setProducts] = useState([]);
@@ -141,7 +141,6 @@ function AdminProducts() {
     };
 
     return (
-        // FIX: שינוי שם הקלאס הראשי
         <div className="products-view-container"> 
             <div className="view-header">
                 <h3>ניהול מנויים וכרטיסיות ({products.length})</h3>
@@ -157,7 +156,6 @@ function AdminProducts() {
             {error && <p className="error-message">{error}</p>}
 
             {showForm ? (
-                // FIX: הסרת ה-inline style והחלפתו בקלאס
                 <form onSubmit={handleSubmit} className="product-form">
                     <h2>{isEditing ? 'עריכת מנוי' : 'מנוי/כרטיסייה חדשים'}</h2>
                     

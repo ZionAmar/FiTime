@@ -22,10 +22,6 @@ function StudioModal({ studio, onClose, onSave }) {
     const [currentAdmin, setCurrentAdmin] = useState(null);
     const [selectedNewAdminId, setSelectedNewAdminId] = useState('');
 
-    // 2. החלפת ה-state הישן
-    // const [isConfirmingAdminAssign, setIsConfirmingAdminAssign] = useState(false);
-
-    // 3. הוספת state חדש למודל האישור
     const [confirmState, setConfirmState] = useState({
         isOpen: false,
         title: '',
@@ -35,7 +31,6 @@ function StudioModal({ studio, onClose, onSave }) {
 
 
     useEffect(() => {
-        // ... (ה-useEffect נשאר זהה) ...
         const initializeModal = async () => {
             setIsLoading(true);
             setInitializationError('');
@@ -70,7 +65,6 @@ function StudioModal({ studio, onClose, onSave }) {
         initializeModal();
     }, [studio, isEditMode]);
 
-    // 4. פונקציית עזר לסגירת מודל האישור
     const closeConfirmModal = () => {
         setConfirmState({ isOpen: false });
     };
@@ -95,7 +89,6 @@ function StudioModal({ studio, onClose, onSave }) {
     };
 
     const validateForm = () => {
-        // ... (הפונקציה נשארת זהה) ...
         if (!formData.name.trim()) {
             setFieldErrors({ name: "שם הסטודיו הוא שדה חובה." });
             return false;
@@ -115,7 +108,6 @@ function StudioModal({ studio, onClose, onSave }) {
     };
 
     const handleSubmit = async (e) => {
-        // ... (הפונקציה נשארת זהה) ...
         e.preventDefault();
         resetErrors();
         if (!validateForm()) return;
@@ -155,7 +147,6 @@ function StudioModal({ studio, onClose, onSave }) {
         }
     };
 
-    // 5. פונקציה שמבצעת את ההחלפה בפועל
     const performAssignNewAdmin = async () => {
         closeConfirmModal();
         setIsLoading(true);
@@ -170,7 +161,6 @@ function StudioModal({ studio, onClose, onSave }) {
         }
     };
     
-    // 6. פונקציה שפותחת את מודל האישור
     const handleAssignNewAdmin = async () => {
         if (!selectedNewAdminId) return;
 
@@ -187,7 +177,6 @@ function StudioModal({ studio, onClose, onSave }) {
         });
     };
 
-    // 7. פונקציה שפותחת את מודל מחיקת הסטודיו (חדש)
     const handleDeleteStudioClick = () => {
         setConfirmState({
             isOpen: true,
@@ -199,7 +188,6 @@ function StudioModal({ studio, onClose, onSave }) {
         });
     };
 
-    // 8. פונקציה שמבצעת את מחיקת הסטודיו (חדש)
     const performDeleteStudio = async () => {
         closeConfirmModal();
         setIsLoading(true);
@@ -220,7 +208,6 @@ function StudioModal({ studio, onClose, onSave }) {
     );
 
     if (initializationError) {
-        // ... (קוד טיפול בשגיאת אתחול נשאר זהה) ...
         return (
             <div className="modal-overlay">
                 <div className="modal-content" style={{ padding: '2rem', textAlign: 'center' }}>
@@ -239,7 +226,6 @@ function StudioModal({ studio, onClose, onSave }) {
                     <h2>{isEditMode ? `עריכת סטודיו: ${studio.name}` : 'הוספת סטודיו חדש'}</h2>
                     
                     <form onSubmit={handleSubmit} className="settings-form">
-                        {/* ... (כל ה-fieldset-ים נשארים זהים) ... */}
                         <fieldset disabled={isLoading}>
                             <legend>פרטי הסטודיו</legend>
                             <div className="form-field">
@@ -338,7 +324,6 @@ function StudioModal({ studio, onClose, onSave }) {
                                 {isLoading ? 'מעדכן...' : 'הפוך למנהל'}
                             </button>
                             
-                            {/* 9. הוספת כפתור מחיקה */}
                             <button
                                 type="button"
                                 className="btn btn-danger"

@@ -152,7 +152,6 @@ function TrainerDashboard() {
         } catch (error) {
             const errorMessage = error.message || "שגיאה לא צפויה בביצוע צ'ק-אין.";
             setActionError(errorMessage);
-            // רענון הלו"ז במקרה של שגיאה כדי לסנכרן
             fetchSchedule(); 
         } finally {
             setCheckingInId(null);
@@ -166,7 +165,6 @@ function TrainerDashboard() {
             alert('הגעתך אושרה. שיהיה שיעור מוצלח!');
             await fetchSchedule();
         } catch (error) {
-            // לוכד את הודעת השגיאה המפורטת (כגון 403 או שגיאת תזמון)
             const errorMessage = error.message || "שגיאה באישור הגעה. נסה שוב."
             setActionError(errorMessage);
         }
@@ -207,7 +205,6 @@ function TrainerDashboard() {
         return <div className="loading">טוען את לוח הזמנים שלך...</div>;
     }
     
-    // הצגת שגיאת טעינה כללית
     if (fetchError) {
         return <div className="error-state"><h2 style={{ color: '#dc3545' }}>❌ שגיאה בטעינת הלו"ז:</h2><p>{fetchError}</p></div>;
     }

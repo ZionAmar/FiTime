@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import ConfirmModal from './ConfirmModal'; // 1. ייבוא המודל החדש
-
-// ודא שאתה מייבא את קובץ ה-CSS של המודל הראשי (UserModal) אם הוא לא מיובא במקום אחר
+import ConfirmModal from './ConfirmModal'; 
 import '../styles/UserModal.css'; 
 
 function ManageUserModal({ user, allStudios, onClose, onSave }) {
@@ -18,12 +16,6 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
     const [newRoleStudioId, setNewRoleStudioId] = useState('');
     const [newRoleName, setNewRoleName] = useState('member');
     
-    // 2. הסרת ה-state הישן
-    // const [confirmingRemoveRole, setConfirmingRemoveRole] = useState(null);
-    // const [confirmingAddAdmin, setConfirmingAddAdmin] = useState(false);
-    // const [confirmingDeleteUser, setConfirmingDeleteUser] = useState(0);
-
-    // 3. הוספת state חדש למודל האישור
     const [confirmState, setConfirmState] = useState({
         isOpen: false,
         title: '',
@@ -42,14 +34,12 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
         }
     }, [user]);
     
-    // פונקציית עזר לסגירת מודל האישור
     const closeConfirmModal = () => {
         setConfirmState({ isOpen: false });
-        setError(''); // נקה שגיאות קודמות
+        setError('');
     };
 
-    // 4. שדרוג handleRemoveRole
-    const handleRemoveRole = (studioId, roleName, studioName) => {
+        const handleRemoveRole = (studioId, roleName, studioName) => {
         setConfirmState({
             isOpen: true,
             title: 'אישור הסרת תפקיד',
@@ -60,7 +50,6 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
         });
     };
     
-    // 5. פונקציה חדשה לביצוע ההסרה
     const performRemoveRole = async (studioId, roleName) => {
         closeConfirmModal();
         setIsLoading(true);
@@ -75,7 +64,6 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
         }
     };
 
-    // 6. שדרוג handleAddRole
     const handleAddRole = async () => {
         if (!newRoleStudioId) {
             setError('אנא בחר סטודיו.');
@@ -83,7 +71,6 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
         }
 
         if (newRoleName === 'admin') {
-            // אם זה 'admin', פתח מודל אישור
             setConfirmState({
                 isOpen: true,
                 title: 'אישור הוספת מנהל',
@@ -95,11 +82,9 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
             return;
         }
 
-        // אם זה לא 'admin', בצע מיד
         performAddRole(false);
     };
 
-    // 7. פונקציה חדשה לביצוע ההוספה
     const performAddRole = async (isAdmin) => {
         closeConfirmModal();
         setIsLoading(true);
@@ -121,7 +106,6 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
         } 
     };
     
-    // 8. שדרוג handleDeleteUser
     const handleDeleteUser = () => {
         setConfirmState({
             isOpen: true,
@@ -133,7 +117,6 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
         });
     };
 
-    // 9. פונקציה חדשה לביצוע המחיקה
     const performDeleteUser = async () => {
         closeConfirmModal();
         setIsLoading(true);
@@ -149,7 +132,7 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
     };
 
     const handleChange = (e) => {
-        setError(''); // נקה שגיאות ישנות
+        setError(''); 
         setFieldErrors({});
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -269,7 +252,6 @@ function ManageUserModal({ user, allStudios, onClose, onSave }) {
                 </div>
             </div>
 
-            {/* 10. הוספת המודל החדש לדף */}
             <ConfirmModal
                 isOpen={confirmState.isOpen}
                 title={confirmState.title}

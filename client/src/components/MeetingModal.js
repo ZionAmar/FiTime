@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import MultiSelect from './MultiSelect';
 import ConfirmModal from './ConfirmModal';
-import '../styles/UserModal.css'; // משתמש באותו בסיס עיצובי
+import '../styles/UserModal.css';
 
 function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours }) {
     const isEditMode = Boolean(meeting);
@@ -273,7 +273,6 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
                         <div className="modal-actions">
                             {isEditMode && <button type="button" className="btn btn-danger" onClick={handleDelete} disabled={isLoading}>מחק</button>}
                             
-                            {/* FIX: Replaced .cta-button-pro with standard .btn .btn-primary */}
                             <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'שומר...' : 'שמור שינויים'}</button>
                         </div>
                     </form>

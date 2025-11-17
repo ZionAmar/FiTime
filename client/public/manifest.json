@@ -1,0 +1,21 @@
+{
+  "name": "FiTime",
+  "short_name": "FiTime",
+  "description": "מערכת ניהול הסטודיו שלך",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#7C9A92",
+  "background_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "./images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

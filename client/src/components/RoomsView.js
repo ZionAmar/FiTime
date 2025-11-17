@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import RoomModal from '../components/RoomModal';
 import ConfirmModal from '../components/ConfirmModal';
-import '../styles/CardGridView.css'; // ודא שהקובץ מיובא
+import '../styles/CardGridView.css'; 
 
 function RoomsView() {
     const [rooms, setRooms] = useState([]);

@@ -23,17 +23,12 @@ function SchedulePage() {
             let meetingsToDisplay = [];
         
             if (activeRole === 'trainer') {
-                // המאמן מקבל רק את השיעורים שלו
                 meetingsToDisplay = await api.get(`/api/meetings?viewAs=trainer`);
             } else {
-                // מתאמנים/אורחים מקבלים לוח ציבורי + השיעורים האישיים שלהם
                 
-                // 1. קבלת שיעורים ציבוריים (Public)
-                // בדיקה זו מכוסה ב-meeting_C.js (שגיאת studioId נזרקת אם חסר)
                 const publicMeetings = await api.get(`/api/meetings/public?studioId=${activeStudio.studio_id}`);
                 const meetingsMap = new Map(publicMeetings.map(m => [m.id, m]));
             
-                // 2. קבלת שיעורים אישיים (My Meetings) אם המשתמש מחובר
                 if (user) { 
                     const myMeetings = await api.get(`/api/meetings?viewAs=${activeRole}`);
                     myMeetings.forEach(myMeeting => {
@@ -73,7 +68,6 @@ function SchedulePage() {
                 setEvents(formattedEvents);
             }
         } catch (error) {
-            // לוכד את הודעת השגיאה המפורטת מה-Backend
             const errorMessage = error.message || "שגיאה כללית בטעינת לוח השיעורים. נסה שוב.";
             setFetchError(errorMessage);
             setEvents([]); 
@@ -87,7 +81,6 @@ function SchedulePage() {
     const handleEventClick = (clickInfo) => {
         if (fetchError) return;
         
-        // מונע לחיצה על אירועי עבר
         if (new Date(clickInfo.event.startStr) < new Date()) {
             return;
         }
