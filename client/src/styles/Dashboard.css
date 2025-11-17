@@ -1,9 +1,8 @@
-
 .pro-dashboard {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1.5rem;
-    font-family: 'Rubik', sans-serif; 
+    font-family: var(--font-family); /* 1. FIX: Changed from 'Rubik' to our system font */
 }
 
 .dashboard-header-pro {
@@ -19,12 +18,13 @@
     font-size: 2.2rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--text-color);
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-color */
 }
 
 .header-text p {
     font-size: 1.1rem;
-    color: var(--text-secondary-color);
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-secondary-color */
+    opacity: 0.7; /* 2. FIX: Added opacity for secondary text */
     max-width: 500px;
 }
 
@@ -61,7 +61,7 @@
 }
 
 .card-header h2 {
-    margin: 0;
+    /* margin: 0; <-- Removed, already in global reset */
     font-size: 1.1rem;
     font-weight: 600;
 }
@@ -74,7 +74,8 @@
 .empty-state, .empty-state-small {
     padding: 1rem 0;
     text-align: center;
-    color: var(--text-secondary-color);
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-secondary-color */
+    opacity: 0.6; /* 2. FIX: Added opacity */
     font-style: italic;
 }
 
@@ -85,11 +86,11 @@
     color: var(--primary-color);
     font-weight: 500;
     cursor: pointer;
-    transition: color 0.2s ease;
+    transition: color 0.2s, opacity 0.2s ease; /* 3. FIX: Added opacity */
 }
 
 .see-all-link:hover {
-    color: var(--primary-dark-color);
+    opacity: 0.8; /* 3. FIX: Changed from undefined color to opacity */
     text-decoration: underline;
 }
 
@@ -105,7 +106,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background-color: var(--background-color);
+    background-color: var(--bg-color); /* 2. FIX: Was --background-color */
     border-radius: 8px;
     text-align: center;
     min-width: 120px;
@@ -121,7 +122,8 @@
 }
 .stat-label {
     font-size: 0.9rem;
-    color: var(--text-secondary-color);
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-secondary-color */
+    opacity: 0.7; /* 2. FIX: Added opacity */
 }
 
 /* --- Next Session Card --- */
@@ -132,7 +134,8 @@
 }
 .next-session-card .session-trainer,
 .next-session-card .session-time {
-    color: var(--text-secondary-color);
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-secondary-color */
+    opacity: 0.7; /* 2. FIX: Added opacity */
     margin-bottom: 1rem;
 }
 .session-actions {
@@ -154,7 +157,7 @@
     border-bottom: none;
 }
 .list-item:hover {
-    background-color: var(--background-color);
+    background-color: var(--bg-color); /* 2. FIX: Was --background-color */
 }
 .item-details {
     display: flex;
@@ -165,14 +168,17 @@
 }
 .item-subtitle {
     font-size: 0.9rem;
-    color: var(--text-secondary-color);
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-secondary-color */
+    opacity: 0.7; /* 2. FIX: Added opacity */
 }
 .status-badge {
     padding: 0.25rem 0.6rem;
+    margin: 10px;
     border-radius: 12px;
     font-size: 0.8rem;
     font-weight: 500;
 }
+/* 3. NOTE: Kept these semantic colors as they are good UX */
 .status-badge.waiting {
     background-color: #fff8e1;
     color: #f59e0b;
@@ -204,6 +210,7 @@
 .participant-row:not(:last-child) {
     border-bottom: 1px solid var(--border-color);
 }
+/* 3. NOTE: Kept semantic green */
 .participant-row.checked-in {
     background-color: #f0fdf4; 
     color: #166534;
@@ -218,11 +225,13 @@
     background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px; /* 4. FIX: Was 5px, standardized */
     cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
 }
-.check-in-btn:disabled {
-    background-color: #65a30d; 
+/* This state is for a *checked-in* button, so it should be a success color */
+.check-in-btn.checked-in { /* 3. FIX: Added class for clarity */
+    background-color: #28a745; /* Standardized green */
     cursor: not-allowed;
 }
 
@@ -237,21 +246,16 @@
     border-bottom: none;
 }
 .agenda-time {
-    background-color: var(--background-color);
+    background-color: var(--bg-color); /* 2. FIX: Was --background-color */
     padding: 0.4rem 0.6rem;
-    border-radius: 5px;
+    border-radius: 8px; /* 4. FIX: Was 5px, standardized */
     font-weight: 500;
 }
 .agenda-occupancy {
     margin-right: auto;
     font-size: 0.9rem;
-    color: var(--text-secondary-color);
-}
-
-@media (max-width: 992px) {
-    .dashboard-grid-pro {
-        grid-template-columns: 1fr;
-    }
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-secondary-color */
+    opacity: 0.7; /* 2. FIX: Added opacity */
 }
 
 .check-in-info {
@@ -261,12 +265,13 @@
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
     font-size: 0.9rem;
-    color: var(--text-secondary-color);
+    color: var(--dark-color); /* 2. FIX: Was undefined --text-secondary-color */
+    opacity: 0.8; /* 2. FIX: Added opacity */
     text-align: center;
 }
 
 .next-session-card.live-session {
-    background-color: var(--primary-light-color);
+    background-color: var(--light-color); /* 2. FIX: Was undefined --primary-light-color */
     border-color: var(--primary-color);
 }
 
@@ -302,7 +307,7 @@
 }
 
 .live-session .btn.btn-success {
-    background-color: #28a745;
+    background-color: #28a745; /* 3. NOTE: Kept semantic green */
     border-color: #28a745;
     color: white;
     cursor: default;
@@ -319,4 +324,20 @@
 }
 .admin-management-section h4 {
     margin-bottom: 1rem;
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 992px) {
+    .dashboard-grid-pro {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-text h1 {
+        font-size: 1.8rem; /* 5. FIX: Added responsive font size */
+    }
+    .header-text p {
+        font-size: 1rem; /* 5. FIX: Added responsive font size */
+    }
 }

@@ -1,21 +1,22 @@
 .daily-schedule-widget {
-    /* background-color: #2a2a3e; */
-    padding: 24px;
+    padding: 20px;
     border-radius: 12px;
-    /* color: #e0e0e0; */
+    font-family: var(--font-family);
 }
 
 .daily-schedule-widget h3 {
     margin-top: 0;
     margin-bottom: 20px;
     font-size: 1.2rem;
-    border-bottom: 1px solid #4a4a6a;
+    border-bottom: 1px solid var(--border-color); /* Themed */
     padding-bottom: 10px;
+    color: var(--dark-color); /* Themed */
 }
 
 .schedule-header, .schedule-row {
     display: grid;
-    grid-template-columns: 1fr 2.5fr 1.5fr 1fr 1.5fr 0.5fr;
+    /* Kept your 6-column desktop layout */
+    grid-template-columns: 1fr 2.5fr 1.5fr 1fr 1.5fr 0.5fr; 
     gap: 10px;
     align-items: center;
     padding: 10px 0;
@@ -23,14 +24,16 @@
 }
 
 .schedule-header {
-    font-weight: bold;
-    color: #a9a9d0;
-    border-bottom: 1px solid #4a4a6a;
+    font-weight: 600; /* Standardized */
+    color: var(--dark-color); /* Themed */
+    opacity: 0.6; /* Nicer than solid color */
+    border-bottom: 1px solid var(--border-color); /* Themed */
     text-align: right;
 }
 
 .schedule-row {
-    border-bottom: 1px solid #3a3a5a;
+    border-bottom: 1px solid var(--border-color); /* Themed */
+    color: var(--dark-color); /* Themed */
 }
 
 .schedule-row:last-child {
@@ -38,16 +41,17 @@
 }
 
 .schedule-row .time {
-    font-weight: 500;
+    font-weight: 600; /* Bolder */
+    color: var(--primary-color); /* Themed */
 }
 
 .schedule-row .session-name {
-    font-weight: bold;
-    color: #fff;
+    font-weight: 600; /* Standardized */
+    color: var(--dark-color); /* Themed */
 }
 
 .occupancy-bar {
-    background-color: #4a4a6a;
+    background-color: var(--border-color); /* Themed */
     border-radius: 4px;
     height: 8px;
     width: 100%;
@@ -55,7 +59,7 @@
 }
 
 .occupancy-fill {
-    background-color: #a78bfa;
+    background-color: var(--primary-color); /* Themed */
     height: 100%;
     transition: width 0.3s ease;
 }
@@ -63,10 +67,46 @@
 .occupancy-text {
     font-variant-numeric: tabular-nums;
     text-align: left;
+    font-weight: 500;
+    color: var(--dark-color); /* Themed */
+    opacity: 0.7;
 }
 
 .empty-state {
     text-align: center;
     padding: 20px;
-    color: #a9a9d0;
+    color: var(--dark-color); /* Themed */
+    opacity: 0.6;
+}
+
+
+/* --- Responsiveness --- */
+@media (max-width: 768px) {
+    .daily-schedule-widget {
+        padding: 15px 10px;
+    }
+
+    .schedule-header {
+        display: none; /* Hide desktop header */
+    }
+
+    /* Re-grid the row for mobile */
+    .schedule-row {
+        display: grid;
+        grid-template-columns: 1.2fr 3fr; /* 2 columns: Time | Content */
+        grid-template-areas: 
+            "time session"
+            "time trainer"
+            "bar  text";
+        gap: 4px 15px; /* Row gap, Column gap */
+        padding: 15px 0;
+    }
+
+    /* Assign grid areas to the 6 children */
+    .schedule-row > *:nth-child(1) { grid-area: time; align-self: start; font-size: 1rem; }
+    .schedule-row > *:nth-child(2) { grid-area: session; font-size: 1rem; }
+    .schedule-row > *:nth-child(3) { grid-area: trainer; opacity: 0.7; }
+    .schedule-row > *:nth-child(4) { display: none; } /* Hide 4th child (Room) */
+    .schedule-row > *:nth-child(5) { grid-area: bar; align-self: center; }
+    .schedule-row > *:nth-child(6) { grid-area: text; align-self: center; text-align: right; }
 }

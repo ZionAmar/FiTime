@@ -1,80 +1,107 @@
 .multiselect-container {
-  position: relative;
-  font-family: var(--font-family);
+    position: relative;
+    font-family: var(--font-family);
 }
 
 .multiselect-display {
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 5px;
-  background-color: white;
-  cursor: pointer;
-  min-height: 40px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 8px; /* FIX: Standardized radius */
+    padding: 5px;
+    background-color: var(--card-bg-color); /* FIX: Standardized variable */
+    cursor: pointer;
+    min-height: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    transition: border-color 0.2s, box-shadow 0.2s; /* FIX: Added transition */
+}
+
+/* FIX: Added open/focus state */
+.multiselect-display.is-open {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color);
+    outline: none;
 }
 
 .selected-item-tag {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.9rem;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px; /* FIX: Softened radius */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
 }
 
 .remove-tag-btn {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0; /* FIX: Added padding reset */
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.remove-tag-btn:hover {
+    opacity: 1;
 }
 
 .placeholder-text {
-  padding: 5px;
-  color: #888;
+    padding: 5px;
+    color: var(--dark-color); /* FIX: Themed color */
+    opacity: 0.6; /* FIX: Added opacity */
 }
 
 .multiselect-options {
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  max-height: 250px;
-  overflow-y: auto;
-  z-index: 1000;
-  margin-top: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: absolute; /* FIX: CRITICAL - Added position */
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg-color); /* FIX: Standardized variable */
+    border: 1px solid var(--border-color); /* FIX: Themed color */
+    border-radius: 8px; /* FIX: Standardized radius */
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .multiselect-search {
-  padding: 10px;
-  border-bottom: 1px solid var(--border-color);
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .multiselect-search input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px; /* FIX: Standardized radius */
+    font-family: var(--font-family); /* FIX: Added font */
+    text-align: right; /* FIX: Added RTL align */
+}
+
+/* FIX: Added standard focus style */
+.multiselect-search input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color);
 }
 
 .multiselect-option {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
 }
 .multiselect-option:hover {
-  background-color: var(--bg-color);
+    background-color: var(--bg-color);
 }
 .multiselect-option input {
-  margin-left: 10px;
+    margin-right: 10px; /* FIX: Corrected RTL margin */
+    margin-left: 0; 
 }

@@ -11,9 +11,9 @@
 .history-header {
     background-color: var(--card-bg-color);
     padding: 2rem;
-    border-radius: var(--card-radius);
+    border-radius: 12px; /* FIX: Was undefined --card-radius */
     margin-bottom: 2rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* FIX: Was undefined --card-shadow */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -30,7 +30,8 @@
 .history-header p {
     margin: 0.5rem 0 0;
     font-size: 1.1rem;
-    color: #666;
+    color: var(--dark-color); /* FIX: Was #666 */
+    opacity: 0.7; /* FIX: Added opacity */
 }
 
 /* --- Filter --- */
@@ -65,9 +66,9 @@
 /* --- History Card --- */
 .history-card {
     background-color: var(--card-bg-color);
-    border-radius: var(--card-radius);
+    border-radius: 12px; /* FIX: Was undefined --card-radius */
     padding: 1rem 1.5rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* FIX: Was undefined --card-shadow */
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -86,7 +87,7 @@
     justify-content: center;
     background-color: var(--bg-color);
     color: var(--primary-color);
-    border-radius: 10px;
+    border-radius: 8px; /* FIX: Standardized from 10px */
     padding: 0.75rem;
     min-width: 60px;
     height: 60px;
@@ -118,13 +119,14 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem 1rem;
-    color: #777;
+    color: var(--dark-color); /* FIX: Was #777 */
+    opacity: 0.7; /* FIX: Added opacity */
     font-size: 0.95rem;
 }
 
 .card-status {
-    background-color: #E8F5E9; /* Light Green */
-    color: #4CAF50; /* Green */
+    background-color: #f0fdf4; /* FIX: Standardized success color */
+    color: #166534; /* FIX: Standardized success color */
     padding: 0.4rem 1rem;
     border-radius: 50px;
     font-weight: 600;
@@ -136,7 +138,7 @@
     text-align: center;
     padding: 3rem;
     background-color: var(--card-bg-color);
-    border-radius: var(--card-radius);
+    border-radius: 12px; /* FIX: Was undefined --card-radius */
 }
 
 .empty-state-history h3 {
@@ -144,16 +146,32 @@
     font-size: 1.3rem;
 }
 
+/* FIX: Styled button to match .btn.btn-primary */
 .empty-state-history button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-family);
+    font-weight: 600;
+    padding: 10px 24px;
     border-radius: 50px;
-    padding: 0.7rem 1.5rem;
-    font-size: 1rem;
+    border: 1px solid transparent;
     cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-size: 1rem;
+    text-decoration: none;
+    background-image: linear-gradient(to top, var(--primary-color) 0%, #8FB0A8 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     margin-top: 1rem;
 }
+
+.empty-state-history button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0,0,0,0.15);
+}
+
 
 /* --- Responsive --- */
 @media (max-width: 768px) {

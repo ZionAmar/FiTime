@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api'; 
 import ConfirmModal from './ConfirmModal';
+import '../styles/AdminProducts.css'; // FIX: ייבוא קובץ ה-CSS הייעודי
 
 function AdminProducts() {
     const [products, setProducts] = useState([]);
@@ -140,7 +141,8 @@ function AdminProducts() {
     };
 
     return (
-        <div className="trainers-view-container"> 
+        // FIX: שינוי שם הקלאס הראשי
+        <div className="products-view-container"> 
             <div className="view-header">
                 <h3>ניהול מנויים וכרטיסיות ({products.length})</h3>
                 <button 
@@ -152,10 +154,11 @@ function AdminProducts() {
                 </button>
             </div>
 
-            {error && <p className="error-message" style={{ color: 'red' }}>{error}</p>}
+            {error && <p className="error-message">{error}</p>}
 
             {showForm ? (
-                <form onSubmit={handleSubmit} className="product-form" style={{ maxWidth: '500px', margin: '20px auto', display: 'flex', flexDirection: 'column', gap: '15px', background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+                // FIX: הסרת ה-inline style והחלפתו בקלאס
+                <form onSubmit={handleSubmit} className="product-form">
                     <h2>{isEditing ? 'עריכת מנוי' : 'מנוי/כרטיסייה חדשים'}</h2>
                     
                     <div className="form-field">
@@ -183,14 +186,14 @@ function AdminProducts() {
                         <input type="number" id="duration_days" name="duration_days" value={formData.duration_days} onChange={handleChange} placeholder="השאר ריק למנוי ללא הגבלת זמן" min="1" />
                     </div>
 
-                     <div className="form-field">
+                    <div className="form-field">
                         <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <input type="checkbox" name="is_active" checked={formData.is_active === 1} onChange={handleChange} />
                             המנוי פעיל וזמין לרכישה
                         </label>
                     </div>
 
-                    <div className="form-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                    <div className="form-actions">
                         <button type="submit" className="btn btn-primary" disabled={isLoading}>
                             {isLoading ? 'שומר...' : (isEditing ? 'שמור שינויים' : 'צור מנוי')}
                         </button>
@@ -201,29 +204,29 @@ function AdminProducts() {
                 </form>
             ) : (
                 <>
-                    {isLoading && <p>טוען...</p>}
+                    {isLoading && <div className="loading">טוען...</div>}
                     {!isLoading && (
                         <div className="admin-table-container"> 
                             <table className="admin-table" border={1}>
                                 <thead>
-                                    <tr>{/* <--- תיקון 1: הסרת רווחים לפני ה-TH הראשון */}
+                                    <tr>
                                         <th>שם המנוי/כרטיסייה</th>
                                         <th>מחיר</th>
                                         <th>כניסות</th>
                                         <th>תוקף (ימים)</th>
                                         <th>סטטוס</th>
                                         <th>פעולות</th>
-                                    </tr>{/* <--- תיקון 1: הסרת רווחים אחרי ה-TH האחרון */}
+                                    </tr>
                                 </thead>
-                                <tbody>{/* <--- תיקון 2: הסרת רווחים לפני הלולאה */}
+                                <tbody>
                                     {products.map(product => (
-                                        <tr key={product.id}>{/* <--- תיקון 3: הסרת רווחים לפני ה-TD הראשון */}
+                                        <tr key={product.id}>
                                             <td data-label="שם">{product.name}</td>
                                             <td data-label="מחיר">₪{product.price}</td>
                                             <td data-label="כניסות">{product.visit_limit || 'ללא הגבלה'}</td>
                                             <td data-label="תוקף">{product.duration_days || 'ללא הגבלה'}</td>
                                             <td data-label="סטטוס">{product.is_active ? 'פעיל' : 'לא פעיל'}</td>
-                                            <td data-label="פעולות">
+                                            <td data-label="פעולות" className='actions-cell'>
                                                 <button className="btn btn-secondary btn-small" onClick={() => handleEdit(product)} disabled={isLoading}>ערוך</button>
                                                 {product.is_active && (
                                                     <button className="btn btn-danger btn-small" onClick={() => handleDelete(product)} disabled={isLoading}>השבת</button>
@@ -231,7 +234,7 @@ function AdminProducts() {
                                             </td>
                                         </tr>
                                     ))}
-                                </tbody>{/* <--- תיקון 2: הסרת רווחים אחרי הלולאה */}
+                                </tbody>
                             </table>
                         </div>
                     )}

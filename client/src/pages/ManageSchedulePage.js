@@ -8,6 +8,7 @@ import heLocale from '@fullcalendar/core/locales/he';
 import api from '../services/api';
 import MeetingModal from '../components/MeetingModal';
 import '../styles/FullCalendar.css';
+import '../styles/ManageSchedulePage.css'; // <-- FIX: Import the new CSS file
 
 function ManageSchedulePage() {
     const location = useLocation();
@@ -43,7 +44,6 @@ function ManageSchedulePage() {
             setFetchError(null);
             setIsLoading(true);
             try {
-                // קריאה ל-fetchEvents בפני עצמה תזרק שגיאה
                 await fetchEvents(); 
 
                 const [trainersRes, settingsRes] = await Promise.all([
@@ -155,18 +155,19 @@ function ManageSchedulePage() {
         selectedTrainer === 'all' || event.trainer_id == selectedTrainer
     );
 
-    if (isLoading) return <div className="loading-state">טוען את לוח השנה לניהול...</div>;
+    // FIX: Changed className to global .loading
+    if (isLoading) return <div className="loading">טוען את לוח השנה לניהול...</div>;
     
+    // FIX: Replaced inline styles with a standardized CSS class
     if (fetchError) {
         return (
-            <div className="error-state-full-page" style={{ padding: '20px', textAlign: 'center' }}>
-                <h2 style={{ color: '#dc3545' }}>❌ שגיאה בטעינת הלוח</h2>
-                <p style={{ marginTop: '15px', fontWeight: 'bold' }}>{fetchError}</p>
+            <div className="error-state-full-page">
+                <h2>❌ שגיאה בטעינת הלוח</h2>
+                <p>{fetchError}</p>
                 <button 
-                    style={{ marginTop: '20px' }} 
                     className="btn btn-secondary" 
                     onClick={() => window.location.reload()}>
-                        טען מחדש
+                    טען מחדש
                 </button>
             </div>
         );

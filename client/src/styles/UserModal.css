@@ -1,140 +1,87 @@
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(5px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  animation: fadeIn 0.3s ease-out;
-}
+/*
+ * FIX: The .modal-overlay, .modal-close-btn, and @keyframes rules
+ * were removed. They are already defined globally in App.css
+ * and should not be duplicated here.
+ */
 
+/* These rules OVERRIDE the global .modal-content for this specific modal */
 .modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh; 
-  overflow-y: auto; 
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-  position: relative;
-  animation: scaleIn 0.3s ease-out;
+    background: var(--card-bg-color); 
+    max-height: 80vh; /* Specific to this modal */
+    overflow-y: auto; /* Specific to this modal */
 }
 
 .settings-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px; 
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    font-family: var(--font-family); 
 }
 
 .form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .form-field label {
-  font-weight: 500;
-  color: #333;
+    font-weight: 500;
+    color: var(--dark-color);
+    opacity: 0.9;
 }
 
-.form-field input,
+/* FIX: Standardized all form inputs/selects */
+.form-field input[type="text"],
+.form-field input[type="password"],
+.form-field input[type="email"],
+.form-field input[type="date"],
+.form-field input[type="time"],
 .form-field select {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* FIX: Added standard focus style */
+.form-field input[type="text"]:focus,
+.form-field input[type="password"]:focus,
+.form-field input[type="email"]:focus,
+.form-field input[type="date"]:focus,
+.form-field input[type="time"]:focus,
+.form-field select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(124, 154, 146, 0.2);
+}
+
+/* FIX: Standardized modal action footer */
 .modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
 }
 
-.modal-close-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: #f1f1f1;
-  border: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  font-size: 1rem;
-  cursor: pointer;
-  color: #888;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 10;
-}
+/*
+ * FIX: Removed .cta-button-pro and .delete-btn.
+ * The React component should use the global classes:
+ * <button className="btn btn-primary">Save</button>
+ * <button className="btn btn-danger">Delete</button>
+ */
 
-.modal-close-btn:hover {
-  background: #e0e0e0;
-  color: #333;
-}
+/*
+ * FIX: Removed .error class definition.
+ * It is already defined globally in App.css.
+ */
 
-.cta-button-pro,
-.delete-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-}
 
-.cta-button-pro {
-  background-color: #007bff;
-  color: white;
-}
-
-.cta-button-pro:hover {
-  background-color: #0056b3;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
-}
-
-.error {
-  color: #dc3545;
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
+/* --- Profile Picture Styles (Unique to UserModal) --- */
 .profile-picture-field {
     display: flex;
     flex-direction: column;
@@ -155,10 +102,12 @@
     align-items: center;
     justify-content: center;
 }
+
 .modal-actions-profile{
-  display: flex;
-  justify-content: space-around;
+    display: flex;
+    justify-content: space-around;
 }
+
 .profile-picture-preview img {
     width: 100%;
     height: 100%;
@@ -189,15 +138,10 @@
     transform: translateY(0);
 }
 
-/* ========================================= */
-/* Profile Picture Buttons (Always Visible)  */
-/* ========================================= */
-
-/* Delete Button */
 .remove-image-btn {
     position: absolute;
     bottom: 8px;
-    left: 8px; /* For RTL layout */
+    left: 8px; /* Correct for RTL */
     width: 32px;
     height: 32px;
     background-color: rgba(0, 0, 0, 0.5);
@@ -209,7 +153,7 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    opacity: 1; /* Always visible */
+    opacity: 1; 
 }
 
 .remove-image-btn:hover {
@@ -217,23 +161,22 @@
     transform: scale(1.1);
 }
 
-/* Edit Button */
 .edit-image-btn {
     position: absolute;
     bottom: 8px;
-    right: 8px; /* For RTL layout */
+    right: 8px; /* Correct for RTL */
     width: 32px;
     height: 32px;
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
     border-radius: 50%;
-    font-size: 16px; /* For the pencil emoji */
+    font-size: 16px;
     line-height: 32px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    opacity: 1; /* Always visible */
+    opacity: 1; 
 }
 
 .edit-image-btn:hover {

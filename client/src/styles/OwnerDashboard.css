@@ -69,35 +69,15 @@
     overflow-x: auto;
 }
 
-.studios-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-.studios-table th,
-.studios-table td {
-    padding: 12px 15px;
-    text-align: right;
-    border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
-}
-
-.studios-table thead th {
-    background-color: var(--bg-color);
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: var(--dark-color);
-    opacity: 0.6;
-}
-
-.studios-table tbody tr {
-    background-color: 0.2s ease;
-}
-
-.studios-table tbody tr:hover {
-    background-color: var(--light-color);
-}
+/* * FIX: This entire block of outdated table styles was removed 
+ * as it conflicted with the "Professional" style below.
+ *
+ * .studios-table { ... }
+ * .studios-table th, .studios-table td { ... }
+ * .studios-table thead th { ... }
+ * .studios-table tbody tr { ... }
+ * .studios-table tbody tr:hover { ... }
+*/
 
 .actions-cell {
     display: flex;
@@ -114,12 +94,14 @@
 
 .status-badge {
     padding: 0.3rem 0.8rem;
+    margin: 10px;
     border-radius: 50px;
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: capitalize;
 }
 
+/* Note: These semantic colors are good and consistent */
 .status-badge.trialing {
     background-color: #e0f2fe;
     color: #0284c7;
@@ -143,6 +125,7 @@
     border-radius: 50px;
     margin-left: 0;
     width: 220px;
+    max-width: 100%; /* FIX: Added for responsiveness */
     font-family: var(--font-family);
     font-size: 0.9rem;
     transition: all 0.2s ease-in-out;
@@ -161,6 +144,8 @@
     gap: 1rem;
 }
 
+/* Note: This .nav-btn re-implements .btn-secondary from App.css */
+/* This is fine if JSX classes cannot be changed. */
 .nav-btn {
     display: inline-flex;
     align-items: center;
@@ -203,7 +188,7 @@
 }
 
 /* ========================================= */
-/* Professional Table Style Refresh */
+/* Professional Table Style */
 /* ========================================= */
 
 .studios-table {
@@ -239,6 +224,7 @@
     border-radius: 8px; /* Slightly rounded rows */
     box-shadow: 0 2px 8px rgba(0,0,0,0.04); /* Subtle shadow for depth */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* FIX: Removed invalid "background-color: 0.2s ease;" */
 }
 
 .studios-table tbody tr:hover {
@@ -284,8 +270,8 @@
     opacity: 0.8;
 }
 
+/* Note: This .pagination-btn re-implements .btn-secondary */
 .pagination-btn {
-    /* Inherits from .btn but with specific tweaks */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -335,9 +321,9 @@
 .dropdown-menu {
     display: block;
     position: absolute;
-    background-color: #f9f9f9;
+    background-color: var(--card-bg-color); /* FIX: Was #f9f9f9 */
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* FIX: Standardized shadow */
     z-index: 1;
     border-radius: 8px;
     padding: 8px 0;
@@ -347,13 +333,27 @@
 
 /* Links inside the dropdown */
 .dropdown-item {
-    color: black;
+    color: var(--dark-color); /* FIX: Was black */
     padding: 12px 16px;
     text-decoration: none;
     display: block;
     cursor: pointer;
+    font-family: var(--font-family); /* FIX: Added font */
 }
 
 .dropdown-item:hover {
-    background-color: #f1f1f1;
+    background-color: var(--bg-color); /* FIX: Was #f1f1f1 */
+}
+
+/* FIX: Added media query for responsiveness */
+@media (max-width: 768px) {
+    .pagination-controls {
+        flex-wrap: wrap; /* Allow pagination to wrap */
+        gap: 0.75rem;
+    }
+    
+    .search-input {
+        width: 100%; /* Make search input full-width */
+        max-width: none;
+    }
 }

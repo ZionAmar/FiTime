@@ -1,15 +1,12 @@
-
 .landing-page-v6 {
     font-family: var(--font-family);
     background-color: var(--bg-color);
     color: var(--dark-color);
 }
 
-.lp-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-}
+/* * FIX: Removed the unused .lp-container class.
+ * Section-specific containers like .hero-content are used instead.
+ */
 
 .hero-section-v6 {
     position: relative;
@@ -90,7 +87,7 @@
 }
 
 .persona-section { padding: 100px 20px; }
-.persona-content { display: flex; align-items: center; gap: 80px; }
+.persona-content { display: flex; align-items: center; gap: 80px; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; } /* Applied container logic */
 .persona-text, .persona-image-container { flex: 1; }
 .persona-title { font-size: 2.8rem; font-weight: 600; color: var(--dark-color); margin-bottom: 1.5rem; }
 .persona-text p { font-size: 1.1rem; color: var(--dark-color); line-height: 1.8; margin-bottom: 2rem; opacity: 0.8; }
@@ -138,8 +135,8 @@
 .lp-footer { background-color: var(--dark-color); color: var(--light-color); opacity: 0.9; padding: 60px 40px 20px 40px; }
 .footer-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
 .footer-col { flex: 1; min-width: 200px; }
-.footer-logo { font-size: 1.8rem; font-weight: 600; color: #ffffff; margin-bottom: 1rem; }
-.footer-col h4 { font-size: 1.1rem; font-weight: 600; color: #ffffff; margin-bottom: 1.5rem; }
+.footer-logo { font-size: 1.8rem; font-weight: 600; color: var(--light-color); margin-bottom: 1rem; } /* FIX: Was #ffffff */
+.footer-col h4 { font-size: 1.1rem; font-weight: 600; color: var(--light-color); margin-bottom: 1.5rem; } /* FIX: Was #ffffff */
 .footer-col ul { list-style: none; padding: 0; }
 .footer-col ul li { margin-bottom: 1rem; }
 .footer-col ul a { text-decoration: none; color: var(--light-color); opacity: 0.8; transition: opacity 0.2s ease; }
@@ -170,7 +167,7 @@
     }
 
     .persona-content {
-        flex-direction: column !important; 
+        flex-direction: column; /* FIX: Removed !important */
         gap: 40px;
         text-align: center;
     }
@@ -183,5 +180,19 @@
     .footer-content {
         flex-direction: column; 
         text-align: center;
+    }
+}
+
+/* FIX: Added media query for smaller screens */
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2.2rem; /* Further reduce title size */
+    }
+    .animated-text {
+        font-size: 1.4rem; /* Further reduce animated text */
+        height: 30px;
+    }
+    .hero-section-v6 {
+        padding: 100px 20px; /* Reduce hero padding */
     }
 }

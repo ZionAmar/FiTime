@@ -1,77 +1,84 @@
-
 .schedule-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
 }
 
 .fc .fc-toolbar.fc-header-toolbar {
-  margin: 0 0 2rem 0 !important;
-  flex-wrap: wrap;
-  gap: 1rem;
+    margin: 0 0 2rem 0 !important;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 .fc .fc-toolbar-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: var(--dark-color);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    font-family: var(--font-family); /* Added for consistency */
 }
 .fc .fc-button,
 .fc .fc-button-primary {
-  background: var(--card-bg-color) !important;
-  color: var(--dark-color) !important;
-  border: 1px solid var(--border-color) !important;
-  box-shadow: none !important;
-  padding: 8px 16px !important;
-  border-radius: 50px !important;
-  font-weight: 500 !important;
-  text-transform: none !important;
-  transition: all 0.2s ease !important;
+    background: var(--card-bg-color) !important;
+    color: var(--dark-color) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: none !important;
+    padding: 8px 16px !important;
+    border-radius: 50px !important;
+    font-weight: 500 !important;
+    font-family: var(--font-family); /* Added for consistency */
+    text-transform: none !important;
+    transition: all 0.2s ease !important;
 }
+
+/* 2. FIX: Themed hover state to match btn-secondary */
 .fc .fc-button-primary:not(:disabled):hover,
 .fc .fc-button:not(:disabled):hover {
-  background: var(--bg-color) !important;
-  border-color: #ccc !important;
+    background: var(--card-bg-color) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
 }
+
 .fc .fc-button-primary:not(:disabled).fc-button-active,
 .fc .fc-button:not(:disabled).fc-button-active {
-  background-color: var(--primary-color) !important;
-  color: white !important;
-  border-color: var(--primary-color) !important;
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
 }
 
 .fc {
-  border: 1px solid var(--border-color) !important;
-  border-radius: 12px;
-  overflow: hidden;
-  background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: var(--card-bg-color);
 }
 .fc .fc-col-header-cell {
-  background-color: var(--bg-color) !important;
-  border-color: var(--border-color) !important;
-  font-weight: 500;
+    background-color: var(--bg-color) !important;
+    border-color: var(--border-color) !important;
+    font-weight: 500;
 }
 .fc .fc-daygrid-day {
-  border-color: var(--border-color) !important;
+    border-color: var(--border-color) !important;
 }
 .fc .fc-day-today {
-  background-color: rgba(124, 154, 146, 0.1) !important;
+    background-color: rgba(124, 154, 146, 0.1) !important;
 }
+
+/* 3. FIX: Themed non-business days */
 .fc .fc-non-business {
     background: repeating-linear-gradient(
-      -45deg,
-      #f8f9fa,
-      #f8f9fa 5px,
-      #ffffff 5px,
-      #ffffff 10px
+        -45deg,
+        var(--bg-color),
+        var(--bg-color) 5px,
+        var(--card-bg-color) 5px,
+        var(--card-bg-color) 10px
     ) !important;
 }
 
 .fc .fc-event {
-  border-radius: 5px !important;
-  padding: 4px 6px !important;
-  font-weight: 500 !important;
-  cursor: pointer;
+    border-radius: 8px !important; /* 4. FIX: Standardized from 5px */
+    padding: 4px 6px !important;
+    font-weight: 500 !important;
+    cursor: pointer;
 }
 .fc .fc-daygrid-event {
     background-color: var(--primary-color);
@@ -79,18 +86,39 @@
 }
 
 .fc .fc-view-harness {
+    /* Kept user's original height rule */
     height: calc(100vh - 220px) !important;
 }
 
+/* 5. FIX: Themed the popover to look like a card */
 .fc-popover {
     max-height: 150px;
     overflow-y: auto;
-
     min-width: 280px; 
     box-sizing: border-box; 
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
 }
 
 .fc-popover .fc-event-title {
     white-space: normal !important; 
     word-wrap: break-word;         
+}
+
+/* 6. FIX: Added media query for mobile toolbar */
+@media (max-width: 768px) {
+    .fc .fc-toolbar.fc-header-toolbar {
+        margin: 0 0 1.5rem 0 !important;
+    }
+    
+    .fc .fc-toolbar-title {
+        font-size: 1.5rem; /* Smaller title on mobile */
+    }
+    
+    .fc .fc-view-harness {
+        /* A more flexible height for mobile */
+        height: auto !important;
+        min-height: 80vh; 
+    }
 }

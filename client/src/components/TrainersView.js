@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UserModal from '../components/UserModal';
 import ConfirmModal from '../components/ConfirmModal';
-import '../styles/TrainersView.css';
+import '../styles/CardGridView.css'; // ודא שהקובץ מיובא
 
 function TrainersView() {
     const [trainers, setTrainers] = useState([]);
@@ -100,7 +100,8 @@ function TrainersView() {
     if (isLoading && trainers.length === 0) return <div className="loading">טוען מאמנים...</div>;
 
     return (
-        <div className="trainers-view-container">
+        // FIX: שינוי שמות הקלאסים
+        <div className="card-grid-container">
             <div className="view-header">
                 <h3>צוות המאמנים ({trainers.length})</h3>
                 <input 
@@ -117,9 +118,9 @@ function TrainersView() {
             
             {error && <p className="error">{error}</p>}
             
-            <div className="trainers-grid">
+            <div className="card-grid">
                 {filteredTrainers.map(trainer => (
-                    <div key={trainer.id} className="trainer-card">
+                    <div key={trainer.id} className="info-card">
                         <h4>{trainer.full_name}</h4>
                         <p>{trainer.email}</p>
                         <p>{trainer.phone}</p>

@@ -5,6 +5,7 @@
     border-top: 1px solid var(--border-color);
     margin-top: auto;
     box-sizing: border-box; /* Ensures padding is included in the width */
+    font-family: var(--font-family); /* Added for consistency */
 }
 
 .main-footer-content {
@@ -78,14 +79,7 @@
     }
 }
 
-/* Sticky Footer Solution */
-
-.layout-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.main-content {
-  flex: 1;
-}
+/*
+ * Sticky Footer Solution was MOVED to App.css 
+ * .layout-wrapper and .main-content are global layout styles.
+ */

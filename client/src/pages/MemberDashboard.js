@@ -23,7 +23,7 @@ const ListItem = ({ title, subtitle, status, statusType, onCancel, registrationI
             {status && <span className={`status-badge ${statusType}`}>{status}</span>}
             {onCancel && (
                 <button 
-                    className="btn-cancel-list btn-danger"
+                    className="btn"
                     onClick={() => onCancel(registrationId, title)}
                     title="בטל הרשמה מרשימת ההמתנה"
                 >

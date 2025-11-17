@@ -14,7 +14,7 @@
 }
 
 .confirm-modal-content {
-    background: white;
+    background: var(--card-bg-color); /* שונה ל-white */
     padding: 2rem;
     border-radius: 12px;
     width: 90%;
@@ -22,6 +22,7 @@
     position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     animation: scaleIn 0.2s ease-out;
+    font-family: var(--font-family); /* נוסף לאחידות */
 }
 
 .confirm-modal-header {
@@ -31,46 +32,36 @@
 
 .confirm-modal-header h2 {
     margin: 0;
-    color: #333;
+    color: var(--dark-color); /* שונה מ-#333 */
+    font-weight: 600; /* הדגשה קלה */
 }
 
 .confirm-modal-body {
     text-align: center;
     font-size: 1.1rem;
-    color: #555;
+    color: var(--dark-color); /* שונה מ-#555 */
+    opacity: 0.9;
     margin-bottom: 2rem;
+    line-height: 1.6; /* שיפור קריאות */
 }
 
-/* (זהה ל-UserModal.css) */
-.confirm-modal-content .modal-close-btn {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: #f1f1f1;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    font-size: 1rem;
-    cursor: pointer;
-    color: #888;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    z-index: 10;
-}
-.confirm-modal-content .modal-close-btn:hover {
-    background: #e0e0e0;
-    color: #333;
-}
+/* * הכלל .modal-close-btn נמחק מכאן. 
+ * הוא כבר מוגדר גלובלית בקובץ App.css 
+ * ואין צורך לשכפל אותו.
+ */
 
-/* (זהה ל-UserModal.css) */
+/* (זהה ל-UserModal.css - אבל עם צבעים מתוקנים) */
 .confirm-modal-content .modal-actions {
     display: flex;
     justify-content: center; /* מרכוז הכפתורים */
     gap: 1rem;
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color); /* שונה מ-#eee */
+}
+
+@media (max-width: 480px) {
+    .confirm-modal-content {
+        padding: 2rem 1.5rem; /* פדינג קטן יותר למובייל */
+    }
 }

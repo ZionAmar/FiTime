@@ -2,11 +2,12 @@
     max-width: 900px;
     margin: 2rem auto;
     padding: 0 1rem;
+    font-family: var(--font-family); /* FIX: Added font */
 }
 
 .page-header {
     margin-bottom: 2rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color); /* FIX: Was #eee */
     padding-bottom: 1rem;
 }
 
@@ -16,7 +17,8 @@
 
 .page-header p {
     font-size: 1.1rem;
-    color: #555;
+    color: var(--dark-color); /* FIX: Was #555 */
+    opacity: 0.7; /* FIX: Added opacity */
     margin-top: 0.5rem;
 }
 
@@ -27,10 +29,10 @@
 }
 
 .membership-card {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
+    background: var(--card-bg-color); /* FIX: Was #ffffff */
+    border: 1px solid var(--border-color); /* FIX: Was #e0e0e0 */
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* FIX: Standardized shadow */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -44,12 +46,12 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-color); /* FIX: Was #f0f0f0 */
 }
 
 .membership-card-header h3 {
     margin: 0;
-    color: var(--primary-color, #007bff);
+    color: var(--primary-color); /* FIX: Removed fallback color */
 }
 
 .membership-card-body {
@@ -66,11 +68,13 @@
 }
 
 .membership-stat strong {
-    color: #333;
+    color: var(--dark-color); /* FIX: Was #333 */
+    font-weight: 600; /* Added for clarity */
 }
 
 .membership-stat span {
-    color: #555;
+    color: var(--dark-color); /* FIX: Was #555 */
+    opacity: 0.8; /* FIX: Added opacity */
     font-weight: 500;
 }
 
@@ -82,16 +86,17 @@
     text-transform: uppercase;
 }
 
+/* FIX: Standardized semantic colors */
 .status-badge.active {
-    background-color: #e0f8e9;
-    color: #1a7431;
+    background-color: #f0fdf4; /* From Dashboard.css */
+    color: #166534; /* From Dashboard.css */
 }
 .status-badge.expired,
 .status-badge.depleted {
     background-color: #fdecec;
-    color: #a91e2c;
+    color: #a91e2c; /* Kept this good red */
 }
 .status-badge.pending {
-    background-color: #fff8e1;
-    color: #b28000;
+    background-color: #fff8e1; /* From Dashboard.css */
+    color: #f59e0b; /* From Dashboard.css */
 }
