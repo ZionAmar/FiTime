@@ -1,84 +1,117 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import ConfirmModal from './ConfirmModal'; // 1. ייבוא המודל החדש
 import '../styles/UserModal.css'; 
 
 function BookingModal({ event, onClose, onSave }) {
     const { user, activeRole } = useAuth();
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isConfirmingCancel, setIsConfirmingCancel] = useState(false);
-    const [isConfirmingWaitlist, setIsConfirmingWaitlist] = useState(false);
+    
+    // 2. הסרת ה-state הישן
+    // const [isConfirmingCancel, setIsConfirmingCancel] = useState(false);
+    // const [isConfirmingWaitlist, setIsConfirmingWaitlist] = useState(false);
+
+    // 3. הוספת state חדש עבור מודל האישור
+    const [confirmState, setConfirmState] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+        confirmText: 'אישור',
+        confirmButtonType: 'btn-primary'
+    });
 
     const isEventInPast = event.start < new Date();
 
-    const resetConfirmations = () => {
-        setError('');
-        setIsConfirmingCancel(false);
-        setIsConfirmingWaitlist(false);
-    };
+    // 4. פונקציית עזר לסגירת מודל האישור
+    const closeConfirmModal = () => {
+        setConfirmState({ isOpen: false });
+    };
 
-    const handleRegister = async () => {
-        resetConfirmations();
+    // 5. פונקציה חדשה שמכילה את לוגיקת הרישום
+    const performRegister = async (forceWaitlist = false) => {
+        closeConfirmModal(); // סגור את מודל האישור (אם היה פתוח)
+        setError('');
         setIsSubmitting(true);
         try {
             const payload = { 
                 meetingId: event.id, 
-                forceWaitlist: isConfirmingWaitlist 
+                forceWaitlist: forceWaitlist 
             };
             const result = await api.post('/api/participants', payload);
-            onSave();
+            onSave(); // סוגר את מודל השיעור
         } catch (err) {
             const serverResponse = err.response?.data;
             
-            if (serverResponse && serverResponse.errorType === 'CLASS_FULL') {
-                setError(serverResponse.message);
-                setIsConfirmingWaitlist(true);
-            
-            } else if (serverResponse && serverResponse.errorType === 'NO_MEMBERSHIP') {
-                setError(serverResponse.message); 
-                setIsConfirmingWaitlist(false); 
-
+            if (serverResponse && serverResponse.errorType === 'CLASS_FULL') {
+                // אם השיעור מלא, פתח מודל אישור להמתנה
+                setConfirmState({
+                    isOpen: true,
+                    title: 'השיעור מלא',
+                    message: `${serverResponse.message} האם תרצה להצטרף לרשימת ההמתנה?`,
+                    onConfirm: () => performRegister(true), // קורא לעצמו עם אישור להמתנה
+                    confirmText: 'כן, הוסף להמתנה',
+                    confirmButtonType: 'btn-warning'
+                });
+            } else if (serverResponse && serverResponse.errorType === 'NO_MEMBERSHIP') {
+                setError(serverResponse.message); 
             } else {
                 setError(err.message || 'שגיאה בעת ההרשמה.');
-                setIsConfirmingWaitlist(false);
             }
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // 6. עדכון: פונקציה זו קוראת רק ל-performRegister
+    const handleRegister = () => {
+        performRegister(false);
     };
 
-    const handleCancel = async () => {
-        if (!event.registrationId) {
-            setError("שגיאה: לא נמצא מזהה הרשמה לביטול.");
-            return;
-        }
-
-        if (!isConfirmingCancel) {
-            resetConfirmations();
-            setIsConfirmingCancel(true);
-            setError('נא לאשר את ביטול ההרשמה בלחיצה נוספת.');
-            return;
-        }
-
-        resetConfirmations();
+    // 7. פונקציה חדשה שמבצעת את הביטול בפועל
+    const performCancel = async () => {
+        closeConfirmModal();
         setIsSubmitting(true);
+        setError('');
         try {
             await api.delete(`/api/participants/${event.registrationId}`);
-            onSave();
+            onSave(); // סוגר את מודל השיעור
         } catch (err) {
             setError(err.message || 'שגיאה בביטול ההרשמה.');
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // 8. עדכון: פונקציה זו פותחת את מודל האישור
+    const handleCancel = () => {
+        if (!event.registrationId) {
+            setError("שגיאה: לא נמצא מזהה הרשמה לביטול.");
+            return;
+        }
+        
+        setError(''); // נקה שגיאות קודמות
+        setConfirmState({
+            isOpen: true,
+            title: 'אישור ביטול הרשמה',
+            message: 'האם אתה בטוח שברצונך לבטל את הרשמתך לשיעור זה?',
+            onConfirm: performCancel,
+            confirmText: 'כן, בטל הרשמה',
+            confirmButtonType: 'btn-danger'
+        });
     };
     
+    // 9. עדכון: פונקציית הסגירה הראשית
     const handleClose = () => {
-        resetConfirmations();
-        onClose();
+        setError('');
+        closeConfirmModal(); // סגור גם את מודל האישור אם פתוח
+        onClose(); // סגור את מודל השיעור
     };
 
 
+    // 10. פישוט renderActionButtons (אין צורך בבדיקות כפולות)
     const renderActionButtons = () => {
         if (isEventInPast) {
             return <p><strong>שיעור זה כבר התקיים.</strong></p>;
@@ -92,10 +125,10 @@ function BookingModal({ event, onClose, onSave }) {
             return (
                 <button 
                     onClick={handleCancel} 
-                    className={`btn ${isConfirmingCancel ? 'btn-danger-confirm' : 'cancel-btn'}`} 
+                    className="btn cancel-btn" // קלאס פשוט
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? 'מבטל...' : (isConfirmingCancel ? 'לחץ שוב לאישור ביטול' : 'בטל הרשמה')}
+                    {isSubmitting ? 'מבטל...' : 'בטל הרשמה'}
                 </button>
             );
         }
@@ -107,12 +140,12 @@ function BookingModal({ event, onClose, onSave }) {
                         {event.status === 'waiting' ? 'אתה נמצא ברשימת ההמתנה.' : 'המקום שלך ממתין לאישור.'}
                     </strong></p>
                     <button 
-                        onClick={handleCancel} 
-                        className={`btn ${isConfirmingCancel ? 'btn-danger-confirm' : 'cancel-btn'}`} 
+                        onClick={handleCancel} // גם כאן, פשוט פותח מודל
+                        className="btn cancel-btn"
                         disabled={isSubmitting}
                         style={{marginTop: '10px'}}
                     >
-                        {isSubmitting ? 'מבטל...' : (isConfirmingCancel ? 'לחץ שוב לאישור' : 'בטל הרשמה מההמתנה')}
+                        {isSubmitting ? 'מבטל...' : 'בטל הרשמה מההמתנה'}
                     </button>
                 </>
             );
@@ -120,12 +153,13 @@ function BookingModal({ event, onClose, onSave }) {
         
         const isFull = (event.participant_count >= event.capacity);
         
-        if (isFull && !isConfirmingWaitlist) {
+        if (isFull) {
             const count = event.waiting_list_count || 0;
             const msg = count > 0 ? `השיעור מלא. כבר יש ${count} ברשימת ההמתנה.` : 'השיעור מלא.';
             return (
                 <>
                     <p><strong>{msg}</strong></p>
+                    {/* קריאה רגילה ל-handleRegister, והוא יטפל בפתיחת המודל */}
                     <button onClick={handleRegister} className="btn btn-warning" disabled={isSubmitting}>
                         {isSubmitting ? 'מצטרף...' : 'הצטרף לרשימת ההמתנה'}
                     </button>
@@ -133,14 +167,7 @@ function BookingModal({ event, onClose, onSave }) {
             );
         }
 
-        if (isConfirmingWaitlist) {
-             return (
-                <button onClick={handleRegister} className="btn btn-warning" disabled={isSubmitting}>
-                    {isSubmitting ? 'מצטרף...' : 'אשר הצטרפות להמתנה'}
-                </button>
-            );
-        }
-
+        // אין צורך ב-isConfirmingWaitlist
         return (
             <button onClick={handleRegister} className="btn register-btn" disabled={isSubmitting}>
                 {isSubmitting ? 'רושם...' : 'הירשם לשיעור'}
@@ -149,23 +176,38 @@ function BookingModal({ event, onClose, onSave }) {
     };
 
     return (
-        <div className="modal-overlay" onClick={handleClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <button className="modal-close-btn" onClick={handleClose}>&times;</button>
-                <h2>פרטי השיעור</h2>
-                <h3>{event.title.split(' (')[0]}</h3>
-                <p><strong>מאמן/ה:</strong> {event.trainerName}</p>
-                <p><strong>חדר:</strong> {event.roomName}</p>
-                <p><strong>תאריך:</strong> {event.start.toLocaleDateString('he-IL')}</p>
-                <p><strong>שעה:</strong> {event.start.toTimeString().slice(0, 5)}</p>
-                
-                {error && <p className={`error ${isConfirmingCancel || isConfirmingWaitlist ? 'confirm-message' : ''}`}>{error}</p>}
+        <>
+            <div className="modal-overlay" onClick={handleClose}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                    <button className="modal-close-btn" onClick={handleClose}>&times;</button>
+                    <h2>פרטי השיעור</h2>
+                    <h3>{event.title.split(' (')[0]}</h3>
+                    <p><strong>מאמן/ה:</strong> {event.trainerName}</p>
+                    <p><strong>חדר:</strong> {event.roomName}</p>
+                    <p><strong>תאריך:</strong> {event.start.toLocaleDateString('he-IL')}</p>
+                    <p><strong>שעה:</strong> {event.start.toTimeString().slice(0, 5)}</p>
+                    
+                    {/* עכשיו מציגים שגיאות בלבד, לא הודעות אישור */}
+                    {error && <p className="error">{error}</p>}
 
-                <div className="modal-actions">
-                    {renderActionButtons()}
+                    <div className="modal-actions">
+                        {renderActionButtons()}
+                    </div>
                 </div>
             </div>
-        </div>
+
+            {/* 11. הוספת המודל החדש לדף */}
+            <ConfirmModal
+                isOpen={confirmState.isOpen}
+                title={confirmState.title}
+                message={confirmState.message}
+                onConfirm={confirmState.onConfirm}
+                onCancel={closeConfirmModal}
+                confirmText={confirmState.confirmText}
+                cancelText="ביטול"
+                confirmButtonType={confirmState.confirmButtonType}
+            />
+        </>
     );
 }
 

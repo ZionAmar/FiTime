@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UserModal from '../components/UserModal';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/TrainersView.css';
 
 function TrainersView() {
@@ -10,7 +11,13 @@ function TrainersView() {
     const [editingUser, setEditingUser] = useState(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+    
+    const [confirmState, setConfirmState] = useState({ isOpen: false });
+
+    const closeConfirmModal = () => {
+        setConfirmState({ isOpen: false });
+        setError('');
+    };
 
     const fetchTrainers = async () => {
         setIsLoading(true);
@@ -35,51 +42,54 @@ function TrainersView() {
         fetchTrainers();
     };
 
-    const handleDelete = async (userId, userName) => {
-        if (confirmingDeleteId !== userId) {
-            setConfirmingDeleteId(userId);
-            setError(`האם למחוק את ${userName}? לחץ שוב לאישור.`);
-            return;
-        }
-        
-        setError('');
+    const performDelete = async (userId) => {
+        closeConfirmModal();
         setIsLoading(true);
+        setError('');
         try {
             await api.delete(`/api/users/${userId}`);
             fetchTrainers();
-            setConfirmingDeleteId(null);
         } catch (err) {
             setError(err.message || 'שגיאה במחיקת המאמן.');
         } finally {
             setIsLoading(false);
         }
     };
+
+    const handleDelete = (userId, userName) => {
+        setError('');
+        setConfirmState({
+            isOpen: true,
+            title: 'אישור מחיקת מאמן',
+            message: `האם אתה בטוח שברצונך למחוק את ${userName}? פעולה זו תסיר את המשתמש מהסטודיו.`,
+            onConfirm: () => performDelete(userId),
+            confirmText: 'כן, מחק',
+            confirmButtonType: 'btn-danger'
+        });
+    };
     
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
-        setConfirmingDeleteId(null);
         setError('');
     };
 
     const openAddModal = () => {
         setEditingUser(null);
         setIsAddModalOpen(true);
-        setConfirmingDeleteId(null);
         setError('');
     };
 
     const openEditModal = (trainer) => {
         setIsAddModalOpen(false);
         setEditingUser(trainer);
-        setConfirmingDeleteId(null);
         setError('');
     };
 
     const closeModal = () => {
         setEditingUser(null);
         setIsAddModalOpen(false);
-        setConfirmingDeleteId(null);
         setError('');
+        closeConfirmModal();
     };
 
     const filteredTrainers = trainers.filter(trainer => 
@@ -105,7 +115,7 @@ function TrainersView() {
                 </button>
             </div>
             
-            {error && <p className={`error ${confirmingDeleteId ? 'confirm-message' : ''}`}>{error}</p>}
+            {error && <p className="error">{error}</p>}
             
             <div className="trainers-grid">
                 {filteredTrainers.map(trainer => (
@@ -118,11 +128,11 @@ function TrainersView() {
                                 ערוך
                             </button>
                             <button 
-                                className={`btn ${confirmingDeleteId === trainer.id ? 'btn-danger-confirm' : 'btn-danger'}`} 
+                                className="btn btn-danger" 
                                 onClick={() => handleDelete(trainer.id, trainer.full_name)}
-                                disabled={isLoading && confirmingDeleteId === trainer.id}
+                                disabled={isLoading}
                             >
-                                {confirmingDeleteId === trainer.id ? 'לחץ לאישור' : 'מחק'}
+                                מחק
                             </button>
                         </div>
                     </div>
@@ -139,6 +149,17 @@ function TrainersView() {
             )}
 
             <button className="fab" onClick={openAddModal}>+</button>
+
+            <ConfirmModal
+                isOpen={confirmState.isOpen}
+                title={confirmState.title}
+                message={confirmState.message}
+                onConfirm={confirmState.onConfirm}
+                onCancel={closeConfirmModal}
+                confirmText={confirmState.confirmText}
+                cancelText="ביטול"
+                confirmButtonType={confirmState.confirmButtonType}
+            />
         </div>
     );
 }

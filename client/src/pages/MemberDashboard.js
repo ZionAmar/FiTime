@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/Dashboard.css';
 
 const StatPill = ({ label, value, icon }) => (
@@ -12,7 +13,7 @@ const StatPill = ({ label, value, icon }) => (
     </div>
 );
 
-const ListItem = ({ title, subtitle, status, statusType, onCancel, registrationId, confirmingCancelId }) => (
+const ListItem = ({ title, subtitle, status, statusType, onCancel, registrationId }) => (
     <div className="list-item">
         <div className="item-details">
             <span className="item-title">{title}</span>
@@ -22,11 +23,11 @@ const ListItem = ({ title, subtitle, status, statusType, onCancel, registrationI
             {status && <span className={`status-badge ${statusType}`}>{status}</span>}
             {onCancel && (
                 <button 
-                    className={`btn-cancel-list ${confirmingCancelId === registrationId ? 'btn-danger-confirm' : 'btn-danger'}`}
+                    className="btn-cancel-list btn-danger"
                     onClick={() => onCancel(registrationId, title)}
                     title="בטל הרשמה מרשימת ההמתנה"
                 >
-                    {confirmingCancelId === registrationId ? 'אשר' : 'בטל'}
+                    בטל
                 </button>
             )}
         </div>
@@ -80,11 +81,15 @@ function MemberDashboard() {
     const [cancelError, setCancelError] = useState(null);
     const [arrivalError, setArrivalError] = useState(null);
     const [listError, setListError] = useState(null);
-    const [confirmingCancelId, setConfirmingCancelId] = useState(null);
+    
+    const [confirmState, setConfirmState] = useState({ isOpen: false });
+
+    const closeConfirmModal = () => {
+        setConfirmState({ isOpen: false });
+    };
 
     const resetListMessages = () => {
         setListError(null);
-        setConfirmingCancelId(null);
     };
 
     const fetchMeetings = async () => {
@@ -115,37 +120,52 @@ function MemberDashboard() {
         }
     }, [user, activeStudio]);
     
-    const handleModalCancel = async (registrationId, sessionName) => {
+    const performCancel = async (registrationId, origin) => {
+        closeConfirmModal();
         setCancelError(null);
-        if (window.confirm(`האם לבטל את הרשמתך לשיעור "${sessionName}"?`)) {
-            try {
-                await api.delete(`/api/participants/${registrationId}`);
-                fetchMeetings();
-                closeSessionDetails();
-            } catch (err) {
-                setCancelError(err.message || "שגיאה לא צפויה בביטול ההרשמה.");
-            }
-        }
-    };
-    
-    const handleListCancel = async (registrationId, sessionName) => {
         setListError(null);
-        if (confirmingCancelId !== registrationId) {
-            setConfirmingCancelId(registrationId);
-            setListError(`לבטל הרשמה ל"${sessionName}"? לחץ שוב לאישור.`);
-            return;
-        }
-
         setIsLoading(true);
-        resetListMessages();
+
         try {
             await api.delete(`/api/participants/${registrationId}`);
             fetchMeetings();
+            if (origin === 'modal') {
+                closeSessionDetails();
+            }
         } catch (err) {
-            setListError(err.message || 'שגיאה בביטול ההרשמה.');
+            const errorMsg = err.message || "שגיאה לא צפויה בביטול ההרשמה.";
+            if (origin === 'modal') {
+                setCancelError(errorMsg);
+            } else {
+                setListError(errorMsg);
+            }
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleModalCancel = (registrationId, sessionName) => {
+        setCancelError(null);
+        setConfirmState({
+            isOpen: true,
+            title: 'אישור ביטול הרשמה',
+            message: `האם לבטל את הרשמתך לשיעור "${sessionName}"?`,
+            onConfirm: () => performCancel(registrationId, 'modal'),
+            confirmText: 'כן, בטל',
+            confirmButtonType: 'btn-danger'
+        });
+    };
+    
+    const handleListCancel = (registrationId, sessionName) => {
+        setListError(null);
+        setConfirmState({
+            isOpen: true,
+            title: 'אישור ביטול הרשמה',
+            message: `האם לבטל את הרשמתך מרשימת ההמתנה לשיעור "${sessionName}"?`,
+            onConfirm: () => performCancel(registrationId, 'list'),
+            confirmText: 'כן, בטל',
+            confirmButtonType: 'btn-danger'
+        });
     };
 
     const openSessionDetails = (session) => {
@@ -217,7 +237,7 @@ function MemberDashboard() {
     const formatDateOnly = (date) => new Intl.DateTimeFormat('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
     const getStatusText = (status) => {
         if (status === 'waiting') return 'ברשימת המתנה';
-        if (status === 'pending') return 'ממתין לאישורך';
+        if (status === 'pending') return 'ממתין לאišורך';
         return '';
     };
 
@@ -305,7 +325,7 @@ function MemberDashboard() {
                                 <span className="card-icon">⏳</span>
                                 <h2>רשימות המתנה ({waitingList.length})</h2>
                             </div>
-                            {listError && <p className={`error ${confirmingCancelId ? 'confirm-message' : ''}`} style={{padding: '0 15px 10px'}}>{listError}</p>}
+                            {listError && <p className="error" style={{padding: '0 15px 10px'}}>{listError}</p>}
                             {waitingList.length > 0 ? (
                                 waitingList.map(item => 
                                     <ListItem 
@@ -316,7 +336,6 @@ function MemberDashboard() {
                                         statusType={item.status}
                                         registrationId={item.registrationId}
                                         onCancel={handleListCancel}
-                                        confirmingCancelId={confirmingCancelId}
                                     />
                                 )
                             ) : <p className="empty-state">אתה לא רשום לאף רשימת המתנה.</p>}
@@ -350,6 +369,17 @@ function MemberDashboard() {
                 onCancel={handleModalCancel}
                 cancelError={cancelError}
                 showCancelButton={selectedSession && !currentSession && nextSession?.id === selectedSession.id}
+            />
+
+            <ConfirmModal
+                isOpen={confirmState.isOpen}
+                title={confirmState.title}
+                message={confirmState.message}
+                onConfirm={confirmState.onConfirm}
+                onCancel={closeConfirmModal}
+                confirmText={confirmState.confirmText || 'אישור'}
+                cancelText="ביטול"
+                confirmButtonType={confirmState.confirmButtonType || 'btn-danger'}
             />
         </>
     );

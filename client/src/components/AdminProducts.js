@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api'; 
+import ConfirmModal from './ConfirmModal';
 
 function AdminProducts() {
     const [products, setProducts] = useState([]);
@@ -16,6 +17,13 @@ function AdminProducts() {
         visit_limit: '',
         duration_days: '',
         is_active: 1
+    });
+
+    const [confirmState, setConfirmState] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {}
     });
 
     const fetchProducts = async () => {
@@ -105,17 +113,29 @@ function AdminProducts() {
         }
     };
 
-    const handleDelete = async (product) => {
-        if (window.confirm(`האם אתה בטוח שברצונך להשבית את "${product.name}"?`)) {
-            try {
-                setIsLoading(true);
-                await api.delete(`/api/products/${product.id}`);
-                await fetchProducts(); 
-            } catch (err) {
-                setError(err.response?.data?.message || err.message || 'שגיאה בהשבתת המנוי');
-            } finally {
-                setIsLoading(false);
-            }
+    const handleDelete = (product) => {
+        setError(''); 
+        setConfirmState({
+            isOpen: true,
+            title: 'אישור השבתת מנוי',
+            message: `האם אתה בטוח שברצונך להשבית את "${product.name}"? לא יהיה ניתן לשייך אותו יותר למתאמנים חדשים.`,
+            onConfirm: () => performDelete(product.id),
+            confirmText: 'כן, השבת',
+            confirmButtonType: 'btn-danger'
+        });
+    };
+
+    const performDelete = async (productId) => {
+        setConfirmState({ isOpen: false });
+        setIsLoading(true);
+        setError('');
+        try {
+            await api.delete(`/api/products/${productId}`);
+            await fetchProducts(); 
+        } catch (err) {
+            setError(err.response?.data?.message || err.message || 'שגיאה בהשבתת המנוי');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -186,18 +206,18 @@ function AdminProducts() {
                         <div className="admin-table-container"> 
                             <table className="admin-table" border={1}>
                                 <thead>
-                                    <tr>
+                                    <tr>{/* <--- תיקון 1: הסרת רווחים לפני ה-TH הראשון */}
                                         <th>שם המנוי/כרטיסייה</th>
                                         <th>מחיר</th>
                                         <th>כניסות</th>
                                         <th>תוקף (ימים)</th>
                                         <th>סטטוס</th>
                                         <th>פעולות</th>
-                                    </tr>
+                                    </tr>{/* <--- תיקון 1: הסרת רווחים אחרי ה-TH האחרון */}
                                 </thead>
-                                <tbody>
+                                <tbody>{/* <--- תיקון 2: הסרת רווחים לפני הלולאה */}
                                     {products.map(product => (
-                                        <tr key={product.id}>
+                                        <tr key={product.id}>{/* <--- תיקון 3: הסרת רווחים לפני ה-TD הראשון */}
                                             <td data-label="שם">{product.name}</td>
                                             <td data-label="מחיר">₪{product.price}</td>
                                             <td data-label="כניסות">{product.visit_limit || 'ללא הגבלה'}</td>
@@ -211,12 +231,23 @@ function AdminProducts() {
                                             </td>
                                         </tr>
                                     ))}
-                                </tbody>
+                                </tbody>{/* <--- תיקון 2: הסרת רווחים אחרי הלולאה */}
                             </table>
                         </div>
                     )}
                 </>
             )}
+
+            <ConfirmModal
+                isOpen={confirmState.isOpen}
+                title={confirmState.title}
+                message={confirmState.message}
+                onConfirm={confirmState.onConfirm}
+                onCancel={() => setConfirmState({ isOpen: false })}
+                confirmText={confirmState.confirmText || 'אישור'}
+                cancelText={confirmState.cancelText || 'ביטול'}
+                confirmButtonType={confirmState.confirmButtonType || 'btn-primary'}
+            />
         </div>
     );
 }

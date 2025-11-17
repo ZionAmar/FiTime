@@ -1,144 +1,174 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import RoomModal from '../components/RoomModal';
+import ConfirmModal from '../components/ConfirmModal'; // 1. ייבוא המודל החדש
 import '../styles/TrainersView.css';
 
 function RoomsView() {
-    const [rooms, setRooms] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [editingRoom, setEditingRoom] = useState(null);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+    const [rooms, setRooms] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [editingRoom, setEditingRoom] = useState(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    // 2. החלפת הלוגיקה של האישור
+    const [confirmState, setConfirmState] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {}
+    });
 
-    const fetchRooms = async () => {
-        setIsLoading(true);
-        setError('');
-        try {
-            const data = await api.get('/api/rooms');
-            setRooms(data);
-        } catch (err) {
-            setError(err.message || 'שגיאה בטעינת החדרים');
-        } finally {
-            setIsLoading(false);
-        }
+    const fetchRooms = async () => {
+        setIsLoading(true);
+        setError('');
+        try {
+            const data = await api.get('/api/rooms');
+            setRooms(data);
+        } catch (err) {
+            setError(err.message || 'שגיאה בטעינת החדרים');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRooms();
+    }, []);
+    
+    const handleSave = () => {
+        setEditingRoom(null);
+        setIsAddModalOpen(false);
+        fetchRooms(); 
+    };
+
+    // 3. הפונקציה שפותחת את מודל האישור
+    const handleDeleteClick = (room) => {
+        setError('');
+        setConfirmState({
+            isOpen: true,
+            title: 'אישור מחיקת חדר',
+            message: `האם אתה בטוח שברצונך למחוק את החדר "${room.name}"? פעולה זו היא סופית ועלולה להשפיע על שיעורים קיימים.`,
+            onConfirm: () => performDelete(room.id),
+            confirmText: 'כן, מחק חדר',
+            confirmButtonType: 'btn-danger'
+        });
+    };
+
+    // 4. הפונקציה שמבצעת את המחיקה בפועל
+    const performDelete = async (roomId) => {
+        setConfirmState({ isOpen: false }); // סגור את המודל
+        setError('');
+        setIsLoading(true);
+        try {
+            await api.delete(`/api/rooms/${roomId}`);
+            fetchRooms();
+        } catch (err) {
+            setError(err.message || 'שגיאה במחיקת החדר.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    useEffect(() => {
-        fetchRooms();
-    }, []);
-    
-    const handleSave = () => {
-        setEditingRoom(null);
-        setIsAddModalOpen(false);
-        fetchRooms(); 
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setError('');
+    };
+
+    const openAddModal = () => {
+        setEditingRoom(null);
+        setIsAddModalOpen(true);
+        setError('');
+    };
+
+    const openEditModal = (room) => {
+        setIsAddModalOpen(false);
+        setEditingRoom(room);
+        setError('');
+    };
+
+    const closeConfirmModal = () => {
+        setConfirmState({ isOpen: false });
     };
 
-    const handleDelete = async (roomId, roomName) => {
-        if (confirmingDeleteId !== roomId) {
-            setConfirmingDeleteId(roomId);
-            setError(`האם למחוק את "${roomName}"? לחץ שוב לאישור.`);
-            return;
-        }
+    const closeModal = () => {
+        setEditingRoom(null);
+        setIsAddModalOpen(false);
+        setError('');
+    };
 
-        setError('');
-        setIsLoading(true);
-        try {
-            await api.delete(`/api/rooms/${roomId}`);
-            fetchRooms();
-            setConfirmingDeleteId(null);
-        } catch (err) {
-            setError(err.message || 'שגיאה במחיקת החדר.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const filteredRooms = rooms.filter(room => 
+        room.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        setConfirmingDeleteId(null);
-        setError('');
-    };
+    if (isLoading && rooms.length === 0) return <div className="loading">טוען חדרים...</div>;
 
-    const openAddModal = () => {
-        setEditingRoom(null);
-        setIsAddModalOpen(true);
-        setConfirmingDeleteId(null);
-        setError('');
-    };
+    return (
+        <>
+            <div className="trainers-view-container">
+                <div className="view-header">
+                    <h3>רשימת חדרים ({rooms.length})</h3>
+                    
+                    <input 
+                        type="text"
+                        placeholder="חפש לפי שם חדר..."
+                        className="search-input"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                    />
 
-    const openEditModal = (room) => {
-        setIsAddModalOpen(false);
-        setEditingRoom(room);
-        setConfirmingDeleteId(null);
-        setError('');
-    };
+                    <button className="btn btn-primary" onClick={openAddModal}>
+                        + הוסף חדר
+                    </button>
+                </div>
+                
+                {error && <p className="error">{error}</p>}
 
-    const closeModal = () => {
-        setEditingRoom(null);
-        setIsAddModalOpen(false);
-        setConfirmingDeleteId(null);
-        setError('');
-    };
+                <div className="trainers-grid">
+                    {filteredRooms.map(room => (
+                        <div key={room.id} className="trainer-card">
+                            <h4>{room.name}</h4>
+                            <p>קיבולת: {room.capacity} אנשים</p>
+                            <p>{room.has_equipment ? 'כולל ציוד' : 'ללא ציוד'}</p>
+                            <div className="card-actions">
+                                <button className="btn btn-secondary" onClick={() => openEditModal(room)}>ערוך</button>
+                                <button 
+                                    className="btn btn-danger" 
+                                    onClick={() => handleDeleteClick(room)} // 5. קריאה לפונקציה שפותחת את המודל
+                                    disabled={isLoading}
+                                >
+                                    מחק
+                                </button>
+                        </div>
+                    </div>
+                ))}
+                </div>
 
-    const filteredRooms = rooms.filter(room => 
-        room.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+                {(isAddModalOpen || editingRoom) && (
+                    <RoomModal 
+                        room={editingRoom}
+                        onClose={closeModal}
+                        onSave={handleSave}
+                    />
+                )}
 
-    if (isLoading && rooms.length === 0) return <div className="loading">טוען חדרים...</div>;
+                <button className="fab" onClick={openAddModal}>+</button>
+            </div>
 
-    return (
-        <div className="trainers-view-container">
-            <div className="view-header">
-                <h3>רשימת חדרים ({rooms.length})</h3>
-                
-                <input 
-                    type="text"
-                    placeholder="חפש לפי שם חדר..."
-                    className="search-input"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                />
-
-                <button className="btn btn-primary" onClick={openAddModal}>
-                    + הוסף חדר
-                </button>
-            </div>
-            
-            {error && <p className={`error ${confirmingDeleteId ? 'confirm-message' : ''}`}>{error}</p>}
-
-            <div className="trainers-grid">
-                {filteredRooms.map(room => (
-                    <div key={room.id} className="trainer-card">
-                        <h4>{room.name}</h4>
-                        <p>קיבולת: {room.capacity} אנשים</p>
-                        <p>{room.has_equipment ? 'כולל ציוד' : 'ללא ציוד'}</p>
-                        <div className="card-actions">
-                            <button className="btn btn-secondary" onClick={() => openEditModal(room)}>ערוך</button>
-                            <button 
-                                className={`btn ${confirmingDeleteId === room.id ? 'btn-danger-confirm' : 'btn-danger'}`} 
-                                onClick={() => handleDelete(room.id, room.name)}
-                                disabled={isLoading && confirmingDeleteId === room.id}
-                            >
-                                {confirmingDeleteId === room.id ? 'לחץ לאישור' : 'מחק'}
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {(isAddModalOpen || editingRoom) && (
-                <RoomModal 
-                    room={editingRoom}
-                    onClose={closeModal}
-                    onSave={handleSave}
-                />
-            )}
-
-            <button className="fab" onClick={openAddModal}>+</button>
-        </div>
-    );
+            {/* 6. הוספת המודל החדש לדף */}
+            <ConfirmModal
+                isOpen={confirmState.isOpen}
+                title={confirmState.title}
+                message={confirmState.message}
+                onConfirm={confirmState.onConfirm}
+                onCancel={closeConfirmModal}
+                confirmText={confirmState.confirmText || 'אישור'}
+                cancelText="ביטול"
+                confirmButtonType={confirmState.confirmButtonType || 'btn-danger'}
+            />
+        </>
+    );
 }
 
 export default RoomsView;
