@@ -10,7 +10,6 @@ function errorHandler(err, req, res, next) {
     success: false,
     message,
     error: errorDetails,
-    // הוספת שדות מותאמים אישית לשגיאות
     field: err.field, 
     errorType: err.errorType,
   });
