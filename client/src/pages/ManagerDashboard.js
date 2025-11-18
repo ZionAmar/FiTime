@@ -8,7 +8,7 @@ import TrainersView from '../components/TrainersView';
 import MembersView from '../components/MembersView'; 
 import '../styles/ManagerDashboard.css';
 import RoomsView from '../components/RoomsView';
-import AdminProducts from '../components/AdminProducts'; // <-- 1. הוסף את השורה הזו
+import AdminProducts from '../components/AdminProducts';
 
 const OverviewView = ({ stats }) => (
     <div className="dashboard-grid-pro">
@@ -70,6 +70,11 @@ function ManagerDashboard() {
         }
     };
 
+    // FIX: פונקציה לעצירה מיידית של אירועי קליק היוצאים מהדשבורד
+    const handleDashboardClick = (e) => {
+        e.stopPropagation();
+    };
+
     if (isLoading) return <div className="loading">טוען את מרכז הבקרה...</div>;
     
     if (error) return <div className="error-state"><h2 style={{ color: '#dc3545' }}>שגיאה בגישה למרכז הבקרה:</h2><p>{error}</p></div>;
@@ -79,7 +84,8 @@ function ManagerDashboard() {
     const { studio, user } = basicData;
 
     return (
-        <div className="pro-dashboard manager-view">
+        // FIX: החלת הפונקציה על ה-div הראשי כדי למנוע קליקים מלהתפשט החוצה
+        <div className="pro-dashboard manager-view" onClick={handleDashboardClick}>
             <header className="dashboard-header-pro">
                 <div className="header-text">
                     <h1>מרכז הבקרה</h1>

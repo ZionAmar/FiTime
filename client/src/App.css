@@ -300,7 +300,7 @@ body {
     
     position: fixed;
     bottom: 2rem;
-    right: 2rem; /* <-- תוקן מ-left ל-right עבור RTL */
+    left: 2rem; /* <-- תוקן מ-left ל-right עבור RTL */
     z-index: 900;
     
     transition: transform 0.2s ease-out;

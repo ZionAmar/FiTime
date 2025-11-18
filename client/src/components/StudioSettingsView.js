@@ -94,7 +94,7 @@ function StudioSettingsView({ initialDetails }) {
     };
 
     return (
-        <form onSubmit={handleSave} className="card-pro settings-form">
+        <form onSubmit={handleSave} className="card-pro settings-form" onClick={e => e.stopPropagation()}>
             <div className="form-header">
                 <h2>הגדרות סטודיו</h2>
             </div>
@@ -104,22 +104,42 @@ function StudioSettingsView({ initialDetails }) {
                     <h4>פרטים כלליים</h4>
                     <div className="form-field">
                         <label>שם הסטודיו</label>
-                        <input name="name" value={details.name || ''} onChange={handleDetailChange} />
+                        <input 
+                            name="name" 
+                            value={details.name || ''} 
+                            onChange={handleDetailChange} 
+                            onFocus={e => e.stopPropagation()} // FIX: עצירת הפצה בפוקוס
+                        />
                         {fieldErrors.name && <p className="error field-error">{fieldErrors.name}</p>}
                     </div>
                     <div className="form-field">
                         <label>מספר טלפון</label>
-                        <input name="phone_number" value={details.phone_number || ''} onChange={handleDetailChange} />
+                        <input 
+                            name="phone_number" 
+                            value={details.phone_number || ''} 
+                            onChange={handleDetailChange} 
+                            onFocus={e => e.stopPropagation()} // FIX: עצירת הפצה בפוקוס
+                        />
                         {fieldErrors.phone_number && <p className="error field-error">{fieldErrors.phone_number}</p>}
                     </div>
                     <div className="form-field">
                         <label>כתובת</label>
-                        <input name="address" value={details.address || ''} onChange={handleDetailChange} />
+                        <input 
+                            name="address" 
+                            value={details.address || ''} 
+                            onChange={handleDetailChange} 
+                            onFocus={e => e.stopPropagation()} // FIX: עצירת הפצה בפוקוס
+                        />
                         {fieldErrors.address && <p className="error field-error">{fieldErrors.address}</p>}
                     </div>
                     <div className="form-field">
                         <label>סלוגן (Tagline)</label>
-                        <input name="tagline" value={details.tagline || ''} onChange={handleDetailChange} />
+                        <input 
+                            name="tagline" 
+                            value={details.tagline || ''} 
+                            onChange={handleDetailChange} 
+                            onFocus={e => e.stopPropagation()} // FIX: עצירת הפצה בפוקוס
+                        />
                         {fieldErrors.tagline && <p className="error field-error">{fieldErrors.tagline}</p>}
                     </div>
                 </div>
@@ -135,14 +155,24 @@ function StudioSettingsView({ initialDetails }) {
                                 <div className="time-inputs-container">
                                     <div className="time-input-pair">
                                         <label className="mobile-only-label">פתיחה</label>
-                                        <input type="time" value={formatTimeForInput(hourData.open_time)} onChange={e => handleHourChange(day.id, 'open_time', e.target.value)} />
+                                        <input 
+                                            type="time" 
+                                            value={formatTimeForInput(hourData.open_time)} 
+                                            onChange={e => handleHourChange(day.id, 'open_time', e.target.value)} 
+                                            onFocus={e => e.stopPropagation()} // FIX: עצירת הפצה בפוקוס
+                                        />
                                     </div>
                                     
                                     <span className="desktop-only-dash">-</span>
 
                                     <div className="time-input-pair">
                                         <label className="mobile-only-label">סגירה</label>
-                                        <input type="time" value={formatTimeForInput(hourData.close_time)} onChange={e => handleHourChange(day.id, 'close_time', e.target.value)} />
+                                        <input 
+                                            type="time" 
+                                            value={formatTimeForInput(hourData.close_time)} 
+                                            onChange={e => handleHourChange(day.id, 'close_time', e.target.value)} 
+                                            onFocus={e => e.stopPropagation()} // FIX: עצירת הפצה בפוקוס
+                                        />
                                     </div>
                                 </div>
                             </div>
