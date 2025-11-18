@@ -117,41 +117,47 @@ const impersonate = async (ownerId, targetUserId) => {
 };
 
 const requestPasswordReset = async (email) => {
-  const user = await userModel.getByEmail(email);
+  const user = await userModel.getByEmail(email);
 
-  if (!user) {
-    return;
-  }
+  if (!user) {
+    const error = new Error("כתובת האימייל שהוזנה לא קיימת במערכת.");
+    error.status = 404;
+    error.errorType = 'EMAIL_NOT_FOUND';
+    throw error;
+  }
 
-  try {
-    const resetToken = jwt.sign(
-      { id: user.id, email: user.email },
-      jwtResetSecret, 
-      { expiresIn: '15m' } 
-    );
+  try {
+    const resetToken = jwt.sign(
+      { id: user.id, email: user.email },
+      jwtResetSecret, 
+      { expiresIn: '15m' } 
+    );
 
     const clientUrl = process.env.BASE_URL || 'http://localhost:3000'; 
     const resetLink = `${clientUrl}/reset-password/${resetToken}`;
 
-    const subject = 'FiTime - בקשה לאיפוס סיסמה';
-    const html = `
-      <h1>שלום ${user.full_name || 'משתמש'},</h1>
-      <p>קיבלנו בקשה לאיפוס הסיסמה בחשבונך באתר FiTime.</p>
-      <p>כדי לאפס את הסיסמה, אנא לחץ על הקישור הבא (הקישור תקף ל-15 דקות):</p>
-      <a href="${resetLink}" style="padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-        אפס סיסמה
-      </a>
-      <p>אם לא ביקשת איפוס, אנא התעלם מהודעה זו.</p>
-    `;
+    const subject = 'FiTime - בקשה לאיפוס סיסמה';
+    const html = `
+      <h1>שלום ${user.full_name || 'משתמש'},</h1>
+      <p>קיבלנו בקשה לאיפוס הסיסמה בחשבונך באתר FiTime.</p>
+      <p>כדי לאפס את הסיסמה, אנא לחץ על הקישור הבא (הקישור תקף ל-15 דקות):</p>
+      <a href="${resetLink}" style="padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+        אפס סיסמה
+      </a>
+      <p>אם לא ביקשת איפוס, אנא התעלם מהודעה זו.</p>
+    `;
 
-    await sendEmail(user.email, subject, html);
+    await sendEmail(user.email, subject, html);
 
-    return;
+    return;
 
-  } catch (err) {
-    console.error('Error in requestPasswordReset service:', err);
-    throw new Error('Failed to send reset email.');
-  }
+  } catch (err) {
+    console.error('Error in requestPasswordReset service:', err);
+    
+    const error = new Error('שגיאה פנימית בשליחת האימייל לאיפוס. אנא נסה שוב מאוחר יותר.');
+    error.status = 500;
+    throw error; 
+  }
 };
 
 const resetPassword = async (token, newPassword) => {

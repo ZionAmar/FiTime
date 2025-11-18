@@ -42,10 +42,10 @@ function BookingModal({ event, onClose, onSave }) {
                 setConfirmState({
                     isOpen: true,
                     title: 'השיעור מלא',
-                    message: `${serverResponse.message} האם תרצה להצטרף לרשימת ההמתנה?`,
+                    message: `${serverResponse.message}`,
                     onConfirm: () => performRegister(true), 
                     confirmText: 'כן, הוסף להמתנה',
-                    confirmButtonType: 'btn-warning' // שימוש בכפתור צהוב
+                    confirmButtonType: 'btn-warning' 
                 });
             } else if (serverResponse && serverResponse.errorType === 'NO_MEMBERSHIP') {
                 setError(serverResponse.message); 

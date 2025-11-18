@@ -2,7 +2,7 @@
   "name": "FiTime",
   "short_name": "FiTime",
   "description": "מערכת ניהול הסטודיו שלך",
-  "start_url": "/",
+  "start_url": "/login",
   "display": "standalone",
   "theme_color": "#7C9A92",
   "background_color": "#FFFFFF",

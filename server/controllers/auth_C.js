@@ -2,19 +2,25 @@ const authService = require('../services/auth_S');
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.jwtSecret;
 
-const login = async (req, res, next) => {
-    try {
-        const { userDetails, studios } = await authService.login(req.body); 
-        
-        const tokenPayload = { id: userDetails.id };
-        const token = jwt.sign(tokenPayload, jwtSecret, { expiresIn: '3h' });
-        
-        res.cookie("jwt", token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 3 * 60 * 60 * 1000 });
+const ONE_MONTH_IN_MS = 30 * 24 * 60 * 60 * 1000;
 
-        res.json({ userDetails, studios });
-    } catch (err) {
-        next(err);
-    }
+const login = async (req, res, next) => {
+    try {
+        const { userDetails, studios } = await authService.login(req.body); 
+        const tokenPayload = { id: userDetails.id };
+        const token = jwt.sign(tokenPayload, jwtSecret, { expiresIn: '30d' }); 
+        
+        res.cookie("jwt", token, { 
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict', 
+            maxAge: ONE_MONTH_IN_MS 
+        });
+
+        res.json({ userDetails, studios });
+    } catch (err) {
+        next(err);
+    }
 };
 
 const register = async (req, res, next) => {
@@ -56,15 +62,19 @@ const impersonate = async (req, res, next) => {
 };
 
 const requestPasswordReset = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    await authService.requestPasswordReset(email);
-    res.status(200).json({ message: "Request processed." });
-  } catch (err) {
-    next(err); 
-  }
+    try {
+        const { email } = req.body;
+        
+        await authService.requestPasswordReset(email); 
+        
+        res.status(200).json({ message: "קישור לאיפוס סיסמה נשלח לדוא''ל שלך." });
+    } catch (err) {
+        if (err.status === 404 && err.errorType === 'EMAIL_NOT_FOUND') {
+            return res.status(404).json({ message: err.message });
+        }
+        next(err); 
+    }
 };
-
 const resetPassword = async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;

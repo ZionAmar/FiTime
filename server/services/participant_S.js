@@ -53,7 +53,7 @@ const addParticipant = async (user, meetingId, forceWaitlist = false) => {
         if (!forceWaitlist) {
             const waitingList = await meetingModel.getWaitingParticipants(meetingId);
             const waitlistCount = waitingList.length;
-            const message = `השיעור מלא. ${waitlistCount > 0 ? `כבר יש ${waitlistCount} אנשים ברשימת ההמתנה.` : ''} האם תרצה להצטרף?`;
+            const message = `השיעור מלא. ${waitlistCount > 0 ? `כבר יש ${waitlistCount} אנשים ברשימת ההמתנה.` : ''} האם תרצה להצטרף לרשימת המתנה?`;
             const error = new Error(message);
             error.status = 409;
             error.errorType = 'CLASS_FULL';
@@ -240,7 +240,7 @@ const declineSpot = async (registrationId) => {
     return { message: 'המקום נדחה.' };
 };
 
-const CHECK_INTERVAL = '0 * * * *'; 
+const CHECK_INTERVAL = '0,30 * * * *';
 
 const startWaitingListCronJob = () => {
     console.log('🕒 Starting Waiting List Monitor (Cron Job)...');
@@ -249,7 +249,7 @@ const startWaitingListCronJob = () => {
         console.log('CRON: Checking for stale pending registrations...');
         
         try {
-            const [staleRegistrations] = await participantModel.findStalePendingRegistrations(8);
+            const [staleRegistrations] = await participantModel.findStalePendingRegistrations(0.5);
             
             if (staleRegistrations.length === 0) {
                 console.log('CRON: No stale registrations found.');
@@ -267,7 +267,7 @@ const startWaitingListCronJob = () => {
                     await participantModel.updateRetryTimestamp(reg.id);
 
                 } else if (reg.notification_retries >= 2) {
-                    console.log(`CRON: Auto-cancelling registration ${reg.id} (16+ hours passed)`);
+                    console.log(`CRON: Auto-cancelling registration ${reg.id} (60+ minutes passed)`);
                     
                     await declineSpot(reg.id);
                 }

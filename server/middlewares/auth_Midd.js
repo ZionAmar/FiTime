@@ -19,8 +19,8 @@ const checkLoginRateLimit = async (req, res, next) => {
 };
 
 const resetRateLimiter = new RateLimiterMemory({
-  points: 3,
-  duration: 10 * 60 
+  points: 5,
+  duration: 3 * 60 
 });
 const checkResetRateLimit = async (req, res, next) => {
   try {
