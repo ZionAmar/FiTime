@@ -81,10 +81,6 @@ function SchedulePage() {
     const handleEventClick = (clickInfo) => {
         if (fetchError) return;
         
-        if (new Date(clickInfo.event.startStr) < new Date()) {
-            return;
-        }
-
         if (activeRole === 'trainer') {
             setSelectedMeetingIdForTrainer(clickInfo.event.id);
         } else {
@@ -129,7 +125,7 @@ function SchedulePage() {
     
     return (
         <div className="container">
-            <div className="schedule-header">
+            {/* <div className="schedule-header">
                 <h2>לוח שיעורים</h2>
                 <p>
                     {activeRole === 'member' 
@@ -138,7 +134,7 @@ function SchedulePage() {
                         ? 'לחץ על שיעור כדי לסמן נוכחות מתאמנים.' 
                         : 'התחבר כדי לנהל את השיעורים האישיים שלך.'}
                 </p>
-            </div>
+            </div> */}
             
             <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}

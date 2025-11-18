@@ -1,14 +1,10 @@
-/*
- * FIX: The .modal-overlay, .modal-close-btn, and @keyframes rules
- * were removed. They are already defined globally in App.css
- * and should not be duplicated here.
- */
+/* UserModal.css - Unified Form Styling */
 
-/* These rules OVERRIDE the global .modal-content for this specific modal */
+/* These rules OVERRIDE the global .modal-content for complex modals */
 .modal-content {
     background: var(--card-bg-color); 
-    max-height: 80vh; /* Specific to this modal */
-    overflow-y: auto; /* Specific to this modal */
+    max-height: 80vh; 
+    overflow-y: auto; 
 }
 
 .settings-form {
@@ -20,7 +16,7 @@
 
 .form-field {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 5px;
 }
 
@@ -30,12 +26,14 @@
     opacity: 0.9;
 }
 
-/* FIX: Standardized all form inputs/selects */
+/* Standardized Inputs */
 .form-field input[type="text"],
 .form-field input[type="password"],
 .form-field input[type="email"],
+.form-field input[type="tel"],
 .form-field input[type="date"],
 .form-field input[type="time"],
+.form-field input[type="number"],
 .form-field select {
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -46,20 +44,16 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* FIX: Added standard focus style */
-.form-field input[type="text"]:focus,
-.form-field input[type="password"]:focus,
-.form-field input[type="email"]:focus,
-.form-field input[type="date"]:focus,
-.form-field input[type="time"]:focus,
+/* Focus State */
+.form-field input:focus,
 .form-field select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(124, 154, 146, 0.2);
 }
 
-/* FIX: Standardized modal action footer */
-.modal-actions {
+/* Footer Actions */
+.modal-actions, .modal-actions-profile {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -68,20 +62,11 @@
     border-top: 1px solid var(--border-color);
 }
 
-/*
- * FIX: Removed .cta-button-pro and .delete-btn.
- * The React component should use the global classes:
- * <button className="btn btn-primary">Save</button>
- * <button className="btn btn-danger">Delete</button>
- */
+.modal-actions-profile {
+    justify-content: space-between; /* Special layout for profile modal */
+}
 
-/*
- * FIX: Removed .error class definition.
- * It is already defined globally in App.css.
- */
-
-
-/* --- Profile Picture Styles (Unique to UserModal) --- */
+/* Profile Picture Styles */
 .profile-picture-field {
     display: flex;
     flex-direction: column;
@@ -103,11 +88,6 @@
     justify-content: center;
 }
 
-.modal-actions-profile{
-    display: flex;
-    justify-content: space-around;
-}
-
 .profile-picture-preview img {
     width: 100%;
     height: 100%;
@@ -120,28 +100,9 @@
     color: var(--primary-color);
 }
 
-.upload-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    text-align: center;
-    padding: 8px 0;
-    font-size: 0.9rem;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-}
-
-.profile-picture-preview:hover .upload-overlay {
-    transform: translateY(0);
-}
-
-.remove-image-btn {
+.remove-image-btn, .edit-image-btn {
     position: absolute;
     bottom: 8px;
-    left: 8px; /* Correct for RTL */
     width: 32px;
     height: 32px;
     background-color: rgba(0, 0, 0, 0.5);
@@ -156,30 +117,70 @@
     opacity: 1; 
 }
 
-.remove-image-btn:hover {
-    background-color: var(--danger-color);
-    transform: scale(1.1);
+.remove-image-btn { left: 8px; }
+.edit-image-btn { right: 8px; }
+
+.remove-image-btn:hover { background-color: var(--danger-color); transform: scale(1.1); }
+.edit-image-btn:hover { background-color: var(--primary-color); transform: scale(1.1); }
+
+/* Checkbox Group (e.g. Roles) */
+.roles-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 5px 0;
 }
 
-.edit-image-btn {
-    position: absolute;
-    bottom: 8px;
-    right: 8px; /* Correct for RTL */
-    width: 32px;
-    height: 32px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 16px;
-    line-height: 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    opacity: 1; 
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.edit-image-btn:hover {
-    background-color: var(--primary-color);
-    transform: scale(1.1);
+/* Fieldset Grouping */
+.form-section-group {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    border: none; /* Reset default fieldset border */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-section-group:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+/* UserModal.css - הוסף את הקוד הזה בתחתית הקובץ */
+
+/* --- כללי מובייל קריטיים --- */
+@media (max-width: 600px) {
+    
+    /* 1. רוחב המודל: ודא שהוא מתאים לרוחב המסך */
+    .modal-content {
+        width: 95%; /* נותן מרווח נחמד בשוליים */
+        max-width: 95vw; /* מונע חריגה */
+        margin: 1rem;
+        padding: 20px;
+    }
+    
+    /* 2. שדות הטופס: הופכים לשורות */
+    .user-form .form-field, 
+    .add-membership-form .form-field {
+        flex-direction: column; /* 🚨 הופך לשדות עמודה */
+        gap: 8px; /* מגדיל רווח אנכי */
+    }
+
+    /* 3. שדות הטופס: תופסים 100% רוחב */
+    .form-field input, 
+    .form-field select {
+        width: 100%;
+        box-sizing: border-box; /* חשוב לשמירת גודל בתוך הפדינג */
+    }
+
+    /* 4. כפתורי הפוטר: מותחים את המודל לרוחב מלא */
+    .modal-actions {
+        justify-content: space-around; /* מרכז כפתורים אם יש צורך */
+        padding-bottom: 0;
+    }
 }

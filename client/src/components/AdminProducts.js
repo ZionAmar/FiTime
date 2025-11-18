@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api'; 
 import ConfirmModal from './ConfirmModal';
-import '../styles/AdminProducts.css';
+// ודא שאתה מייבא את קובץ העיצוב המתאים (אם יש לך קובץ ספציפי או משתמש בגלובלי)
+// import '../styles/TrainersView.css'; // משתמש באותו עיצוב בסיס
 
 function AdminProducts() {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    
+    // 1. הוספת state לחיפוש
+    const [searchTerm, setSearchTerm] = useState('');
 
     const [showForm, setShowForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -24,7 +28,10 @@ function AdminProducts() {
         isOpen: false,
         title: '',
         message: '',
-        onConfirm: () => {}
+        onConfirm: () => {},
+        confirmText: '',
+        cancelText: '',
+        confirmButtonType: ''
     });
 
     const fetchProducts = async () => {
@@ -43,6 +50,15 @@ function AdminProducts() {
     useEffect(() => {
         fetchProducts();
     }, []);
+
+    const closeConfirmModal = () => {
+        setConfirmState({ isOpen: false });
+    };
+
+    // 2. פונקציה לטיפול בשינוי בתיבת החיפוש
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
 
     const handleAddNew = () => {
         setIsEditing(false);
@@ -115,7 +131,7 @@ function AdminProducts() {
     };
 
     const handleDelete = (product) => {
-        setError(''); 
+        setError('');
         setConfirmState({
             isOpen: true,
             title: 'אישור השבתת מנוי',
@@ -127,7 +143,7 @@ function AdminProducts() {
     };
 
     const performDelete = async (productId) => {
-        setConfirmState({ isOpen: false });
+        closeConfirmModal();
         setIsLoading(true);
         setError('');
         try {
@@ -140,24 +156,44 @@ function AdminProducts() {
         }
     };
 
+    // 3. סינון המוצרים לפי הטקסט
+    const filteredProducts = products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
-        <div className="products-view-container"> 
+        <div className="trainers-view-container"> 
             <div className="view-header">
-                <h3>ניהול מנויים וכרטיסיות ({products.length})</h3>
-                <button 
-                    className="btn btn-primary" 
-                    onClick={handleAddNew}
-                    disabled={showForm} 
-                >
-                    + הוסף מנוי/כרטיסייה
-                </button>
+                <h3>ניהול מנויים וכרטיסיות ({filteredProducts.length})</h3>
+                
+                {/* 4. שורת החיפוש - מופיעה רק כשהטופס סגור */}
+                {!showForm && (
+                    <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <input 
+                            type="text"
+                            placeholder="חפש מנוי..."
+                            className="search-input"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            style={{ maxWidth: '200px' }} // הגבלת רוחב כדי לא לשבור את העיצוב
+                        />
+                        <button 
+                            className="btn btn-primary" 
+                            onClick={handleAddNew}
+                        >
+                            + הוסף מנוי
+                        </button>
+                    </div>
+                )}
             </div>
 
-            {error && <p className="error-message">{error}</p>}
+            {error && <p className="error-message" style={{ color: 'red' }}>{error}</p>}
 
             {showForm ? (
-                <form onSubmit={handleSubmit} className="product-form">
-                    <h2>{isEditing ? 'עריכת מנוי' : 'מנוי/כרטיסייה חדשים'}</h2>
+                <form onSubmit={handleSubmit} className="product-form" style={{ maxWidth: '500px', margin: '20px auto', display: 'flex', flexDirection: 'column', gap: '15px', background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+                    <h2 style={{marginBottom: '1rem', textAlign: 'center', color: 'var(--dark-color)'}}>
+                        {isEditing ? 'עריכת מנוי' : 'יצירת מנוי חדש'}
+                    </h2>
                     
                     <div className="form-field">
                         <label htmlFor="name">שם המנוי/כרטיסייה*</label>
@@ -184,56 +220,63 @@ function AdminProducts() {
                         <input type="number" id="duration_days" name="duration_days" value={formData.duration_days} onChange={handleChange} placeholder="השאר ריק למנוי ללא הגבלת זמן" min="1" />
                     </div>
 
-                    <div className="form-field">
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <input type="checkbox" name="is_active" checked={formData.is_active === 1} onChange={handleChange} />
+                     <div className="form-field">
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                            <input type="checkbox" name="is_active" checked={formData.is_active === 1} onChange={handleChange} style={{ width: 'auto' }} />
                             המנוי פעיל וזמין לרכישה
                         </label>
                     </div>
 
-                    <div className="form-actions">
+                    <div className="form-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'flex-end' }}>
+                         <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={isLoading}>
+                            ביטול
+                        </button>
                         <button type="submit" className="btn btn-primary" disabled={isLoading}>
                             {isLoading ? 'שומר...' : (isEditing ? 'שמור שינויים' : 'צור מנוי')}
-                        </button>
-                        <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={isLoading}>
-                            ביטול
                         </button>
                     </div>
                 </form>
             ) : (
                 <>
-                    {isLoading && <div className="loading">טוען...</div>}
+                    {isLoading && <p>טוען...</p>}
                     {!isLoading && (
-                        <div className="admin-table-container"> 
-                            <table className="admin-table" border={1}>
-                                <thead>
-                                    <tr>
-                                        <th>שם המנוי/כרטיסייה</th>
-                                        <th>מחיר</th>
-                                        <th>כניסות</th>
-                                        <th>תוקף (ימים)</th>
-                                        <th>סטטוס</th>
-                                        <th>פעולות</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {products.map(product => (
-                                        <tr key={product.id}>
-                                            <td data-label="שם">{product.name}</td>
-                                            <td data-label="מחיר">₪{product.price}</td>
-                                            <td data-label="כניסות">{product.visit_limit || 'ללא הגבלה'}</td>
-                                            <td data-label="תוקף">{product.duration_days || 'ללא הגבלה'}</td>
-                                            <td data-label="סטטוס">{product.is_active ? 'פעיל' : 'לא פעיל'}</td>
-                                            <td data-label="פעולות" className='actions-cell'>
-                                                <button className="btn btn-secondary btn-small" onClick={() => handleEdit(product)} disabled={isLoading}>ערוך</button>
-                                                {product.is_active && (
-                                                    <button className="btn btn-danger btn-small" onClick={() => handleDelete(product)} disabled={isLoading}>השבת</button>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="trainers-grid"> {/* שימוש באותו גריד כמו של המאמנים */}
+                             {filteredProducts.map(product => (
+                                <div key={product.id} className="trainer-card">
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                                        <h4>{product.name}</h4>
+                                        <span className={`status-badge ${product.is_active ? 'active' : 'canceled'}`}>
+                                            {product.is_active ? 'פעיל' : 'לא פעיל'}
+                                        </span>
+                                    </div>
+                                    
+                                    <div style={{margin: '10px 0', fontSize: '0.95rem', lineHeight: '1.6'}}>
+                                        <p><strong>מחיר:</strong> ₪{product.price}</p>
+                                        <p><strong>כניסות:</strong> {product.visit_limit ? product.visit_limit : '∞'}</p>
+                                        <p><strong>תוקף:</strong> {product.duration_days ? `${product.duration_days} ימים` : '∞'}</p>
+                                    </div>
+                                    
+                                    {product.description && (
+                                        <p style={{fontSize: '0.85rem', fontStyle: 'italic', marginTop: '5px', opacity: 0.7, minHeight: '1.5em'}}>
+                                            {product.description}
+                                        </p>
+                                    )}
+
+                                    <div className="card-actions">
+                                        <button className="btn btn-secondary" onClick={() => handleEdit(product)} disabled={isLoading}>ערוך</button>
+                                        {product.is_active && (
+                                            <button className="btn btn-danger" onClick={() => handleDelete(product)} disabled={isLoading}>השבת</button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {!isLoading && filteredProducts.length === 0 && !showForm && (
+                        <div className="empty-state" style={{textAlign: 'center', padding: '3rem'}}>
+                            <p>{searchTerm ? 'לא נמצאו מנויים תואמים.' : 'עדיין לא יצרת מנויים או כרטיסיות.'}</p>
+                            {!searchTerm && <button className="btn btn-primary" onClick={handleAddNew} style={{marginTop: '10px'}}>צור מנוי ראשון</button>}
                         </div>
                     )}
                 </>
@@ -244,11 +287,16 @@ function AdminProducts() {
                 title={confirmState.title}
                 message={confirmState.message}
                 onConfirm={confirmState.onConfirm}
-                onCancel={() => setConfirmState({ isOpen: false })}
+                onCancel={closeConfirmModal}
                 confirmText={confirmState.confirmText || 'אישור'}
-                cancelText={confirmState.cancelText || 'ביטול'}
+                cancelText="ביטול"
                 confirmButtonType={confirmState.confirmButtonType || 'btn-primary'}
             />
+            
+             {/* כפתור צף למובייל - מופיע רק כשהטופס סגור */}
+            {!showForm && (
+                <button className="fab" onClick={handleAddNew}>+</button>
+            )}
         </div>
     );
 }

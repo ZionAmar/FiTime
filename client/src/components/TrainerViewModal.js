@@ -38,25 +38,27 @@ function TrainerViewModal({ meetingId, onClose }) {
                         <p><strong>שעה:</strong> {meetingDetails.start_time.slice(0, 5)} - {meetingDetails.end_time.slice(0, 5)}</p>
                         <p><strong>חדר:</strong> {meetingDetails.roomName || 'לא שויך חדר'}</p>
                         
-                        <hr />
+                        <hr style={{margin: '1.5rem 0', borderTop: '1px solid var(--border-color)'}} />
 
                         <h4>רשימת משתתפים ({meetingDetails.participants?.length || 0})</h4>
                         {meetingDetails.participants && meetingDetails.participants.length > 0 ? (
-                            <ul className="participants-list">
+                            <ul className="participants-list" style={{padding: 0, listStyle: 'none'}}>
                                 {meetingDetails.participants.map(p => (
-                                    <li key={p.id}>{p.full_name} ({p.status})</li>
+                                    <li key={p.id} style={{padding: '5px 0', borderBottom: '1px solid var(--border-color)'}}>
+                                        {p.full_name} ({p.status})
+                                    </li>
                                 ))}
                             </ul>
                         ) : (
-                            <p>אין משתתפים רשומים כרגע.</p>
+                            <p style={{opacity: 0.7}}>אין משתתפים רשומים כרגע.</p>
                         )}
                         
                         {meetingDetails.waitingList && meetingDetails.waitingList.length > 0 && (
                              <>
-                                <h4>רשימת המתנה ({meetingDetails.waitingList.length})</h4>
-                                <ul className="participants-list">
+                                <h4 style={{marginTop: '1.5rem'}}>רשימת המתנה ({meetingDetails.waitingList.length})</h4>
+                                <ul className="participants-list" style={{padding: 0, listStyle: 'none'}}>
                                     {meetingDetails.waitingList.map(p => (
-                                        <li key={p.id}>{p.full_name}</li>
+                                        <li key={p.id} style={{padding: '5px 0', borderBottom: '1px solid var(--border-color)'}}>{p.full_name}</li>
                                     ))}
                                 </ul>
                             </>

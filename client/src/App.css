@@ -324,3 +324,35 @@ body {
 .main-content {
   flex: 1;
 }
+/* יש לוודא ש-modal-content מוגדר כ-position: relative כדי למקם את הכפתור */
+.modal-content {
+    /* ... עיצובים קיימים ... */
+    position: relative; /* חובה! */
+    padding: 30px; /* מומלץ לוודא שיש ריווח פנימי לכפתור */
+}
+
+/* עיצוב כפתור הסגירה */
+.modal-close {
+    position: absolute;
+    top: 15px; /* מיקום מלמעלה */
+    left: 15px; /* מיקום משמאל (מתאים ל-RTL) */
+    
+    background: none;
+    border: none;
+    color: var(--dark-color, #333); /* צבע כהה */
+    font-size: 28px;
+    font-weight: 200; /* עובי גופן עדין */
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    
+    transition: color 0.2s, transform 0.2s;
+    z-index: 11; /* ודא שהוא מעל התוכן */
+}
+
+.modal-close:hover {
+    color: var(--danger-color, #dc3545); /* צבע אדום במעבר עכבר */
+    transform: rotate(90deg);
+}

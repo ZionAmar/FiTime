@@ -56,12 +56,28 @@
     box-shadow: 0 6px 20px rgba(124, 154, 146, 0.4);
 }
 
-/* --- עיצוב ללשוניות (טאבים) --- */
 .view-switcher {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
+    flex-wrap: nowrap;        /* מונע מהכפתורים לרדת שורה */
+    overflow-x: auto;         /* מאפשר גלילה רוחבית */
+    overflow-y: hidden;       /* מסתיר גלילה לגובה */
+    white-space: nowrap;      /* שומר על הטקסט בשורה אחת */
+    gap: 10px;                /* רווח בין הכפתורים */
+    padding-bottom: 5px;      /* מרווח קטן מלמטה לגלילה נוחה */
+    
+    /* עיצוב פס הגלילה שיהיה עדין (אופציונלי) */
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch; /* גלילה חלקה במובייל */
+}
+
+/* אופציונלי: הסתרת פס הגלילה לגמרי אם אתה מעדיף מראה נקי */
+.view-switcher::-webkit-scrollbar {
+    height: 4px; /* גובה פס הגלילה הרוחבי */
+}
+
+.view-switcher::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
 }
 .view-switcher button {
     background: none;

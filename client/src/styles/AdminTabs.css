@@ -3,7 +3,7 @@
     display: flex;
     border-bottom: 2px solid var(--border-color); /* שונה לשימוש במשתנה */
     margin-bottom: 1.5rem;
-    overflow-x: auto; /* נוסף לרספונסיביות במובייל */
+    /* overflow-x: auto; נוסף לרספונסיביות במובייל */
 }
 
 .tab-btn {

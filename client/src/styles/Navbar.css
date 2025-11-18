@@ -341,3 +341,135 @@
     height: 100%;
     object-fit: cover;
 }
+
+
+@media (max-width: 768px) {
+
+    .navbar {
+
+        padding: 0.5rem 1.5rem;
+
+        z-index: 1100;
+
+    }
+
+    .navbar-desktop-left,
+
+    .navbar-desktop-center,
+
+    .navbar-desktop-right {
+
+        display: none;
+
+    }
+
+
+
+    .navbar-mobile-brand,
+
+    .hamburger {
+
+        display: flex;
+
+        align-items: center;
+
+    }
+
+
+
+    /* --- היררכיית Z-INDEX מתוקנת --- */
+
+    /* Select Dropdown: 1050
+
+       Navbar Header: 1100
+
+       Mobile Menu Overlay: 2000
+
+       Mobile Menu Content: 2001
+
+       Hamburger: 2002
+
+    */
+
+
+
+    .hamburger {
+
+        display: block;
+
+        position: relative;
+
+        width: 28px;
+
+        height: 22px;
+
+        cursor: pointer;
+
+        background: transparent;
+
+        border: none;
+
+        z-index: 2002 !important; /* הכי עליון */
+
+    }
+
+
+
+    .hamburger-bar {
+
+        display: block;
+
+        position: absolute;
+
+        height: 3px;
+
+        width: 100%;
+
+        background: var(--dark-color);
+
+        border-radius: 3px;
+
+        opacity: 1;
+
+        left: 0;
+
+        transform: rotate(0deg);
+
+        transition: .25s ease-in-out;
+
+    }
+
+   
+
+    .hamburger-bar:nth-child(1) { top: 0px; }
+
+    .hamburger-bar:nth-child(2) { top: 9px; }
+
+    .hamburger-bar:nth-child(3) { top: 18px; }
+
+   
+
+    .hamburger.open .hamburger-bar:nth-child(1) {
+
+        top: 9px;
+
+        transform: rotate(135deg);
+
+    }
+
+    .hamburger.open .hamburger-bar:nth-child(2) {
+
+        opacity: 0;
+
+        left: -60px;
+
+    }
+
+    .hamburger.open .hamburger-bar:nth-child(3) {
+
+        top: 9px;
+
+        transform: rotate(-135deg);
+
+    }
+}

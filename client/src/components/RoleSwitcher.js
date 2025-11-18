@@ -12,7 +12,7 @@ function RoleSwitcher() {
         ? [...new Set(studios.flatMap(studio => studio.roles))] 
         : [];
 
-    if (location.pathname !== '/dashboard' || allUserRoles.length <= 1) {
+    if ( allUserRoles.length <= 1) {
         return null; 
     }
 

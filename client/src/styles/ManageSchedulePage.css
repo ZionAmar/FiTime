@@ -1,60 +1,74 @@
-/* --- Manage Schedule Page Styles --- */
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
 
+/* --- התיקון הקריטי: הרמת ההדר לשכבה עליונה --- */
 .schedule-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
-    flex-wrap: wrap; /* Added for mobile */
-    gap: 1rem;
+    
+    /* יוצר הקשר חדש וגבוה */
+    position: relative; 
+    z-index: 1000; 
+    
+    /* חובה כדי שהתפריט לא ייחתך */
+    overflow: visible !important; 
 }
 
-.schedule-header h2 {
-    margin: 0;
+/* המיכל של הפילטר */
+.schedule-filters {
+    min-width: 250px;
+    
+    /* מיקום יחסי וגבוה בתוך ההדר */
+    position: relative;
+    z-index: 1001; 
 }
 
-/* --- Styled Select (matches HistoryPage.css) --- */
-.schedule-filters select {
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-color);
-    font-family: var(--font-family);
-    font-size: 1rem;
-    min-width: 200px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+/* --- לוח שנה בשכבה נמוכה --- */
+.fc {
+    position: relative;
+    z-index: 1; /* נמוך משמעותית מההדר */
 }
 
-.schedule-filters select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(124, 154, 146, 0.2);
-}
+/* התאמה למובייל */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
 
-/* --- Full Page Error State --- */
-.error-state-full-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    text-align: center;
-    min-height: 50vh;
-    font-family: var(--font-family);
-}
+    .schedule-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        margin-bottom: 20px;
+        
+        /* שומרים על ה-z-index הגבוה גם במובייל */
+        position: relative;
+        z-index: 1000;
+        overflow: visible !important;
+    }
 
-.error-state-full-page h2 {
-    color: var(--danger-color);
-}
+    .schedule-filters {
+        width: 100%;
+        position: relative;
+        z-index: 1001;
+    }
+    
+    .schedule-header h2 {
+        margin: 0;
+        text-align: center;
+        font-size: 1.5rem;
+    }
 
-.error-state-full-page p {
-    font-size: 1.1rem;
-    color: var(--dark-color);
-    opacity: 0.8;
-    margin-top: 15px;
-    font-weight: 500;
-}
-
-.error-state-full-page button {
-    margin-top: 20px;
+    .schedule-header p {
+        text-align: center;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        color: #666;
+    }
 }

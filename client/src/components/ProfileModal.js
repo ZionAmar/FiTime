@@ -168,10 +168,12 @@ function ProfileModal({ isOpen, onClose, onOpenChangePassword }) {
                     {error && <p className="error general-error">{error}</p>}
 
                     <div className="modal-actions-profile">
-                        <button type="submit" className="btn register-btn" disabled={isLoading}>
+                        {/* FIX: תיקון כפתור ראשי */}
+                        <button type="submit" className="btn btn-primary" disabled={isLoading}>
                             {isLoading ? 'שומר...' : 'שמור שינויים'}
                         </button>
-                        <button type="button" className="btn register-btn" onClick={onOpenChangePassword} disabled={isLoading}>
+                        {/* FIX: תיקון כפתור משני */}
+                        <button type="button" className="btn btn-secondary" onClick={onOpenChangePassword} disabled={isLoading}>
                             שנה סיסמה
                         </button>
                     </div>

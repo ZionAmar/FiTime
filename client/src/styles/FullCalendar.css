@@ -1,3 +1,5 @@
+/* --- עיצוב כללי לדסקטופ --- */
+
 .schedule-header {
     display: flex;
     justify-content: space-between;
@@ -5,6 +7,7 @@
     margin-bottom: 1.5rem;
 }
 
+/* הדר של הלוח שנה */
 .fc .fc-toolbar.fc-header-toolbar {
     margin: 0 0 2rem 0 !important;
     flex-wrap: wrap;
@@ -14,8 +17,10 @@
     font-size: 1.8rem;
     font-weight: 600;
     color: var(--dark-color);
-    font-family: var(--font-family); /* Added for consistency */
+    font-family: var(--font-family);
 }
+
+/* כפתורי הלוח שנה */
 .fc .fc-button,
 .fc .fc-button-primary {
     background: var(--card-bg-color) !important;
@@ -25,12 +30,11 @@
     padding: 8px 16px !important;
     border-radius: 50px !important;
     font-weight: 500 !important;
-    font-family: var(--font-family); /* Added for consistency */
+    font-family: var(--font-family);
     text-transform: none !important;
     transition: all 0.2s ease !important;
 }
 
-/* 2. FIX: Themed hover state to match btn-secondary */
 .fc .fc-button-primary:not(:disabled):hover,
 .fc .fc-button:not(:disabled):hover {
     background: var(--card-bg-color) !important;
@@ -45,12 +49,15 @@
     border-color: var(--primary-color) !important;
 }
 
+/* המסגרת הראשית של הלוח */
 .fc {
     border: 1px solid var(--border-color) !important;
     border-radius: 12px;
     overflow: hidden;
     background-color: var(--card-bg-color);
 }
+
+/* כותרות הטבלה */
 .fc .fc-col-header-cell {
     background-color: var(--bg-color) !important;
     border-color: var(--border-color) !important;
@@ -63,7 +70,7 @@
     background-color: rgba(124, 154, 146, 0.1) !important;
 }
 
-/* 3. FIX: Themed non-business days */
+/* ימים שאינם ימי עבודה */
 .fc .fc-non-business {
     background: repeating-linear-gradient(
         -45deg,
@@ -74,8 +81,9 @@
     ) !important;
 }
 
+/* אירועים */
 .fc .fc-event {
-    border-radius: 8px !important; /* 4. FIX: Standardized from 5px */
+    border-radius: 8px !important;
     padding: 4px 6px !important;
     font-weight: 500 !important;
     cursor: pointer;
@@ -85,12 +93,12 @@
     border-color: var(--primary-color);
 }
 
+/* גובה ברירת מחדל לדסקטופ */
 .fc .fc-view-harness {
-    /* Kept user's original height rule */
     height: calc(100vh - 220px) !important;
 }
 
-/* 5. FIX: Themed the popover to look like a card */
+/* עיצוב ה-Popover (כשלוחצים על +2 more) */
 .fc-popover {
     max-height: 150px;
     overflow-y: auto;
@@ -106,19 +114,92 @@
     word-wrap: break-word;         
 }
 
-/* 6. FIX: Added media query for mobile toolbar */
+/* === התאמות מיוחדות למובייל (Mobile Layout) === */
 @media (max-width: 768px) {
+
+    /* 1. הכותרת הראשית והפילטר */
+    .schedule-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        margin-bottom: 20px;
+        height: auto;
+        overflow: visible;
+    }
+
+    .schedule-filters select {
+        width: 100%;
+        padding: 12px;
+    }
+
+    /* 2. סרגל הכלים של הלוח שנה */
     .fc .fc-toolbar.fc-header-toolbar {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
         margin: 0 0 1.5rem 0 !important;
     }
-    
-    .fc .fc-toolbar-title {
-        font-size: 1.5rem; /* Smaller title on mobile */
+
+    .fc .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        gap: 5px;
     }
-    
-    .fc .fc-view-harness {
-        /* A more flexible height for mobile */
+
+    .fc .fc-toolbar-title {
+        font-size: 1.5rem !important;
+    }
+
+    .fc .fc-button {
+        padding: 8px 15px !important;
+        font-size: 0.9rem !important;
+        flex-grow: 1;
+        margin: 0 2px !important;
+    }
+
+    /* 3. הגדרות גובה וגלילה - התיקון החשוב */
+    .fc {
         height: auto !important;
+        min-height: 600px;
+    }
+
+    .fc .fc-view-harness {
+        height: 600px !important; /* גובה קבוע לאזור הגלילה */
         min-height: 80vh; 
+    }
+
+    /* --- הסתרת פס גלילה מהכותרת של הימים (החלק הבעייתי) --- */
+    .fc .fc-scrollgrid-section-header .fc-scroller::-webkit-scrollbar {
+        display: none; /* כרום, ספארי */
+    }
+    .fc .fc-scrollgrid-section-header .fc-scroller {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+        overflow: hidden !important; /* מונע גלילה בכותרת */
+    }
+
+    /* וידוא שגוף הלוח נגלל אנכית כרגיל */
+    .fc .fc-scrollgrid-section-body .fc-scroller {
+        overflow-y: auto !important;
+    }
+
+    /* 4. עיצוב פנימי לשיפור הקריאות */
+    .fc .fc-daygrid-day-number {
+        font-size: 1.1rem;
+        padding: 8px;
+    }
+
+    .fc-event-title {
+        font-size: 0.85rem !important;
+        padding: 2px;
+    }
+
+    /* תיקון לתצוגת שבוע - הקטנת רוחב עמודת השעות */
+    .fc-timegrid-axis {
+        width: 40px !important;
+    }
+    .fc-timegrid-slot-label-cushion {
+        font-size: 0.8rem !important;
     }
 }

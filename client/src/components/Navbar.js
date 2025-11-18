@@ -127,7 +127,7 @@ function Navbar() {
                 <div className="navbar-desktop-right">
                     {user && (
                         <>
-                            {activeRole !== 'owner' && <RoleSwitcher />}
+                            {activeRole !== 'owner' && <RoleSwitcher onRoleSwitch={closeMenu}/>}
                             <span className="nav-link" onClick={handleLogout}>התנתק</span>
                             <DesktopProfile user={user} onClick={openProfileModal} />
                         </>
@@ -161,11 +161,13 @@ function Navbar() {
                                     <span className="profile-email">{user.email}</span>
                                 </div>
                             </div>
+                            
                             {activeRole !== 'owner' && (
                                 <div className="mobile-menu-section">
-                                    <RoleSwitcher />
+                                    <RoleSwitcher onRoleSwitch={closeMenu} />
                                 </div>
                             )}
+
                             <hr/>
                             <div className="mobile-menu-section">
                                 {renderNavLinks()}
@@ -187,7 +189,7 @@ function Navbar() {
                     <ProfileModal 
                         isOpen={isProfileModalOpen} 
                         onClose={closeProfileModal}
-                        onOpenChangePassword={openChangePasswordModal} // פונקציה לפתיחת המודל השני
+                        onOpenChangePassword={openChangePasswordModal} 
                     />
                     <ChangePasswordModal
                         isOpen={isChangePasswordModalOpen}

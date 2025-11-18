@@ -101,7 +101,8 @@ function ChangePasswordModal({ isOpen, onClose }) {
                     {message && <p style={{ color: 'green' }}>{message}</p>}
 
                     <div className="modal-actions">
-                        <button type="submit" className="btn register-btn" disabled={isLoading || message}>
+                        {/* FIX: תיקון כפתור */}
+                        <button type="submit" className="btn btn-primary" disabled={isLoading || message}>
                             {isLoading ? 'משנה...' : 'שמור סיסמה חדשה'}
                         </button>
                     </div>

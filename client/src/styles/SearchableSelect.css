@@ -1,0 +1,28 @@
+/* קובץ זה אחראי רק על הקונטיינר והכפתור, לא על התפריט הנפתח */
+
+.searchable-select-container {
+    position: relative;
+    width: 100%;
+    min-width: 200px;
+    font-family: var(--font-family);
+}
+
+.searchable-select-trigger {
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchable-select-trigger:hover {
+    border-color: #aaa;
+}
+
+.searchable-select-trigger.open {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(124, 154, 146, 0.2);
+}
+
+/* התאמה למובייל */
+@media (max-width: 768px) {
+    .searchable-select-container {
+        width: 100%;
+    }
+}

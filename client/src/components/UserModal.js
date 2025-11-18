@@ -260,7 +260,7 @@ function UserModal({ user, onSave, onClose, defaultRole }) {
     return (
         <>
             <div className="modal-overlay" onClick={onClose}>
-                <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: '500px'}}>
+                <div className="modal-content" onClick={e => e.stopPropagation()} >
                     <div className="modal-header">
                         <h2>{title}</h2>
                         <button className="modal-close-btn" onClick={onClose}>&times;</button>

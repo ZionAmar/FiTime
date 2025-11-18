@@ -7,12 +7,12 @@ import interactionPlugin from '@fullcalendar/interaction';
 import heLocale from '@fullcalendar/core/locales/he';
 import api from '../services/api';
 import MeetingModal from '../components/MeetingModal';
+import SearchableSelect from '../components/SearchableSelect'; // 1. ייבוא הרכיב החדש
 import '../styles/FullCalendar.css';
-import '../styles/ManageSchedulePage.css'; // <-- FIX: Import the new CSS file
+import '../styles/ManageSchedulePage.css'; 
 
 function ManageSchedulePage() {
     const location = useLocation();
-    const passedState = location.state;
     const calendarRef = useRef(null);
 
     const [events, setEvents] = useState([]);
@@ -26,6 +26,14 @@ function ManageSchedulePage() {
     const [viewMaxTime, setViewMaxTime] = useState('24:00:00');
     const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState(null); 
+    
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const fetchEvents = async () => {
         try {
@@ -150,15 +158,17 @@ function ManageSchedulePage() {
         fetchEvents();
     };
 
-
     const filteredEvents = events.filter(event => 
         selectedTrainer === 'all' || event.trainer_id == selectedTrainer
     );
 
-    // FIX: Changed className to global .loading
+    const trainerOptions = [
+        { value: 'all', label: 'כל המאמנים' },
+        ...trainers.map(t => ({ value: t.id, label: t.full_name }))
+    ];
+
     if (isLoading) return <div className="loading">טוען את לוח השנה לניהול...</div>;
     
-    // FIX: Replaced inline styles with a standardized CSS class
     if (fetchError) {
         return (
             <div className="error-state-full-page">
@@ -176,12 +186,13 @@ function ManageSchedulePage() {
     return (
         <div className="container"> 
             <div className="schedule-header">
-                <h2>ניהול לוח שנה</h2>
                 <div className="schedule-filters">
-                    <select value={selectedTrainer} onChange={(e) => setSelectedTrainer(e.target.value)}>
-                        <option value="all">כל המאמנים</option>
-                        {trainers.map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
-                    </select>
+                    <SearchableSelect 
+                        options={trainerOptions}
+                        value={selectedTrainer}
+                        onChange={(val) => setSelectedTrainer(val)}
+                        placeholder="סינון לפי מאמן..."
+                    />
                 </div>
             </div>
             
@@ -203,6 +214,14 @@ function ManageSchedulePage() {
                 dayMaxEvents={true} 
                 businessHours={businessHours}
                 selectConstraint="businessHours"
+                
+                views={{
+                    timeGridWeek: {
+                        type: 'timeGrid',
+                        duration: { days: isMobile ? 7 : 7 },
+                        buttonText: isMobile ? 'שבוע' : 'שבוע'
+                    }
+                }}
             />
 
             {(selectedMeeting || modalInitialData) && (
