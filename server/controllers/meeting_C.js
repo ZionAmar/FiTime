@@ -1,6 +1,5 @@
 const meetingService = require('../services/meeting_S');
 
-
 const getMeetings = async (req, res, next) => {
     try {
         const { date, viewAs } = req.query;
@@ -56,6 +55,7 @@ const getMeetingById = async (req, res, next) => {
 
 const updateMeeting = async (req, res, next) => {
     try {
+        // recurrenceMode מגיע כחלק מה-Body
         const updatedMeeting = await meetingService.updateMeeting(req.params.id, req.body, req.user);
         res.json(updatedMeeting);
     } catch (err) {
@@ -65,7 +65,9 @@ const updateMeeting = async (req, res, next) => {
 
 const deleteMeeting = async (req, res, next) => {
     try {
-        await meetingService.deleteMeeting(req.params.id, req.user);
+        // recurrenceMode מגיע מה-Query String (?mode=future)
+        const { mode } = req.query;
+        await meetingService.deleteMeeting(req.params.id, req.user, mode);
         res.status(204).send(); 
     } catch (err) {
         next(err);

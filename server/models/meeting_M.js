@@ -10,9 +10,10 @@ const getWaitingListCountQuery = `
 `;
 
 const getAllByStudioId = (studioId, date) => {
+    // הוספתי כאן את m.group_id
     let query = `
         SELECT 
-            m.id, m.name, m.trainer_id, m.room_id, m.participant_count,
+            m.id, m.name, m.trainer_id, m.room_id, m.participant_count, m.group_id,
             CONCAT(m.date, 'T', m.start_time) as start,
             CONCAT(m.date, 'T', m.end_time) as end,
             u.full_name as trainerName,
@@ -34,9 +35,10 @@ const getAllByStudioId = (studioId, date) => {
 };
 
 const getByTrainerId = (trainerId, studioId, date) => {
+    // הוספתי כאן את m.group_id
     let query = `
         SELECT 
-            m.id, m.name, m.trainer_id, m.room_id, m.participant_count,
+            m.id, m.name, m.trainer_id, m.room_id, m.participant_count, m.group_id,
             CONCAT(m.date, 'T', m.start_time) as start,
             CONCAT(m.date, 'T', m.end_time) as end,
             u.full_name as trainerName,
@@ -58,11 +60,12 @@ const getByTrainerId = (trainerId, studioId, date) => {
 };
 
 const getByMemberId = (memberId, studioId, date) => {
+    // הוספתי כאן את m.group_id
     let query = `
         SELECT 
             m.id, 
             mr.id as registrationId,
-            m.name, m.trainer_id, m.room_id, m.participant_count,
+            m.name, m.trainer_id, m.room_id, m.participant_count, m.group_id,
             CONCAT(m.date, 'T', m.start_time) as start,
             CONCAT(m.date, 'T', m.end_time) as end,
             mr.status, 
@@ -89,9 +92,10 @@ const getByMemberId = (memberId, studioId, date) => {
 };
 
 const getPublicSchedule = (studioId, date) => {
+    // הוספתי כאן את m.group_id
     let query = `
         SELECT 
-            m.id, m.name, u.full_name as trainerName, r.name as roomName, r.capacity, m.participant_count,
+            m.id, m.name, m.group_id, u.full_name as trainerName, r.name as roomName, r.capacity, m.participant_count,
             CONCAT(m.date, 'T', m.start_time) as start,
             CONCAT(m.date, 'T', m.end_time) as end,
             ${getWaitingListCountQuery}
@@ -104,8 +108,9 @@ const getPublicSchedule = (studioId, date) => {
 };
 
 const getById = (id) => {
+    // הוספתי m.group_id באופן מפורש ליתר ביטחון, למרות ש-m.* אמור לתפוס אותו
     const query = `
-        SELECT m.*, r.name as roomName, r.capacity, u.full_name as trainerName 
+        SELECT m.*, m.group_id, r.name as roomName, r.capacity, u.full_name as trainerName 
         FROM meetings m 
         JOIN rooms r ON m.room_id = r.id 
         JOIN users u ON m.trainer_id = u.id
@@ -121,13 +126,14 @@ const findOverlappingMeeting = ({ date, start_time, end_time, room_id, studio_id
 };
 
 const create = async (meetingData, participantIds) => {
-    const { studio_id, name, trainer_id, date, start_time, end_time, room_id } = meetingData;
+    // הוספתי group_id
+    const { studio_id, name, trainer_id, date, start_time, end_time, room_id, group_id } = meetingData;
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
         const [result] = await connection.query(
-            `INSERT INTO meetings (studio_id, name, trainer_id, date, start_time, end_time, room_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [studio_id, name, trainer_id, date, start_time, end_time, room_id]
+            `INSERT INTO meetings (studio_id, name, trainer_id, date, start_time, end_time, room_id, group_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [studio_id, name, trainer_id, date, start_time, end_time, room_id, group_id || null]
         );
         const meetingId = result.insertId;
         if (participantIds && participantIds.length > 0) {
@@ -205,11 +211,15 @@ const update = async (meetingId, meetingData, participantIds) => {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
+        // הוספתי כאן טיפול במקרה של עדכון
+        // שים לב: אנחנו לא מעדכנים את ה-group_id בדרך כלל בעריכה רגילה
         const { name, trainer_id, date, start_time, end_time, room_id } = meetingData;
         await connection.query(
             `UPDATE meetings SET name=?, trainer_id=?, date=?, start_time=?, end_time=?, room_id=? WHERE id=?`,
             [name, trainer_id, date, start_time, end_time, room_id, meetingId]
         );
+        
+        // מחיקת והוספת משתתפים (רק אם נשלחו)
         await connection.query(`DELETE FROM meeting_registrations WHERE meeting_id = ?`, [meetingId]);
         if (participantIds && participantIds.length > 0) {
             const registrations = participantIds.map(userId => [meetingId, userId, 'active']);
@@ -227,6 +237,7 @@ const update = async (meetingId, meetingData, participantIds) => {
         connection.release();
     }
 };
+
 const remove = async (meetingId) => {
     const connection = await db.getConnection();
     try {

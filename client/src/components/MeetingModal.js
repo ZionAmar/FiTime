@@ -1,14 +1,84 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom'; // <--- חובה להוסיף את זה עבור הפורטל
 import api from '../services/api';
 import MultiSelect from './MultiSelect';
 import ConfirmModal from './ConfirmModal';
 import '../styles/UserModal.css';
 
+// --- רכיב פנימי לבחירת אופן הפעולה על סדרה (עם Portal) ---
+const RecurrenceActionModal = ({ isOpen, onClose, onSelect, actionType }) => {
+    if (!isOpen) return null;
+
+    // שימוש ב-Portal כדי להציג את המודל מעל הכל (מחוץ להיררכיה הרגילה)
+    return ReactDOM.createPortal(
+        <div className="modal-overlay" style={{ 
+            zIndex: 9999, 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+        }}>
+            <div className="modal-content" style={{ 
+                backgroundColor: 'white',
+                padding: '25px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                maxWidth: '400px', 
+                textAlign: 'center',
+                position: 'relative',
+                zIndex: 10000 
+            }}>
+                <h3 style={{ marginTop: 0, marginBottom: '15px' }}>
+                    {actionType === 'delete' ? 'מחיקת שיעור חוזר' : 'עדכון שיעור חוזר'}
+                </h3>
+                <p style={{ marginBottom: '20px' }}>שיעור זה הוא חלק מסדרה. כיצד תרצה להחיל את השינוי?</p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <button className="btn btn-secondary" onClick={() => onSelect('single')}>
+                        רק שיעור זה
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => onSelect('future')}>
+                        שיעור זה והבאים
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => onSelect('all')}>
+                        כל הסדרה
+                    </button>
+                </div>
+                
+                <button 
+                    style={{ 
+                        marginTop: '20px', 
+                        background: 'none', 
+                        border: 'none', 
+                        textDecoration: 'underline', 
+                        cursor: 'pointer', 
+                        color: '#666' 
+                    }} 
+                    onClick={onClose}
+                >
+                    ביטול
+                </button>
+            </div>
+        </div>,
+        document.body // היעד של הפורטל
+    );
+};
+
 function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours }) {
     const isEditMode = Boolean(meeting);
+    
+    // זיהוי האם המפגש הוא חלק מסדרה
+    const isSeries = meeting?.group_id ? true : false;
+
     const [formData, setFormData] = useState({
         name: '', date: '', start_time: '', end_time: '',
-        trainer_id: '', room_id: '', participantIds: []
+        trainer_id: '', room_id: '', participantIds: [],
+        isRecurring: false, recurrenceType: 'weekly', recurrenceEndDate: ''
     });
     
     const [allMembers, setAllMembers] = useState([]);
@@ -20,6 +90,12 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
     const [fetchError, setFetchError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     
+    // סטייט למודל בחירת הסדרה
+    const [recurrenceAction, setRecurrenceAction] = useState({
+        isOpen: false,
+        type: 'save', // 'save' or 'delete'
+    });
+
     const [confirmState, setConfirmState] = useState({
         isOpen: false,
         title: '',
@@ -41,15 +117,28 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
                     if (meetingDetails.date) {
                         meetingDetails.date = meetingDetails.date.split('T')[0];
                     }
-                    baseData = { ...meetingDetails, participantIds };
+                    // שומרים את ה-group_id מהשרת, אבל isRecurring יהיה false כדי לא להציג את הצ'קבוקס בעריכה
+                    baseData = { ...meetingDetails, participantIds, isRecurring: false };
                 } else if (initialData) {
                     const startTime = new Date(`${initialData.date}T${initialData.start_time}`);
+                    
+                    // חישוב תאריך סיום סדרה דיפולטיבי (3 חודשים קדימה)
+                    const defaultEndDate = new Date(initialData.date);
+                    defaultEndDate.setMonth(defaultEndDate.getMonth() + 3);
+
                     if (!isNaN(startTime)) {
                         startTime.setHours(startTime.getHours() + 1);
                         const endTime = startTime.toTimeString().slice(0, 5);
-                        baseData = { ...initialData, end_time: endTime };
+                        baseData = { 
+                            ...initialData, 
+                            end_time: endTime,
+                            recurrenceEndDate: defaultEndDate.toISOString().split('T')[0]
+                        };
                     } else {
-                        baseData = initialData;
+                        baseData = {
+                            ...initialData,
+                            recurrenceEndDate: defaultEndDate.toISOString().split('T')[0]
+                        };
                     }
                 }
                 setFormData(prev => ({ ...prev, ...baseData }));
@@ -90,17 +179,14 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
     const resetErrors = () => {
         setError('');
         setFieldErrors({});
-        closeConfirmModal();
-    };
-
-    const closeConfirmModal = () => {
         setConfirmState({ isOpen: false });
     };
 
     const handleChange = (e) => {
         resetErrors();
-        const { name, value } = e.target;
-        const newFormData = { ...formData, [name]: value };
+        const { name, value, type, checked } = e.target;
+        const newValue = type === 'checkbox' ? checked : value;
+        const newFormData = { ...formData, [name]: newValue };
 
         if (name === 'start_time' && newFormData.date) {
             const startTime = new Date(`${newFormData.date}T${value}`);
@@ -112,7 +198,8 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
         setFormData(newFormData);
     };
 
-    const handleSave = async (e) => {
+    // --- לוגיקת שמירה ---
+    const handleSaveRequest = (e) => {
         e.preventDefault();
         resetErrors();
 
@@ -136,12 +223,23 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
             return setError(`שעות הפעילות ביום זה הן בין ${hoursForDay.open_time.slice(0, 5)} ל-${hoursForDay.close_time.slice(0, 5)}.`);
         }
 
+        // אם זו עריכה של סדרה, פותחים את המודל בחירה
+        if (isEditMode && isSeries) {
+            setRecurrenceAction({ isOpen: true, type: 'save' });
+        } else {
+            performSave('single');
+        }
+    };
+
+    const performSave = async (recurrenceMode) => {
+        setRecurrenceAction({ ...recurrenceAction, isOpen: false });
         setIsLoading(true);
         try {
+            const payload = { ...formData, recurrenceMode };
             if (isEditMode) {
-                await api.put(`/api/meetings/${meeting.id}`, formData);
+                await api.put(`/api/meetings/${meeting.id}`, payload);
             } else {
-                await api.post('/api/meetings', formData);
+                await api.post('/api/meetings', payload);
             }
             onSave();
         } catch (err) {
@@ -156,24 +254,30 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
         }
     };
 
-    const handleDelete = () => {
-        setError(''); 
-        setConfirmState({
-            isOpen: true,
-            title: 'אישור מחיקת שיעור',
-            message: `האם אתה בטוח שברצונך למחוק את השיעור "${formData.name}"? כל המשתתפים הרשומים יוסרו.`,
-            onConfirm: performDelete,
-            confirmText: 'כן, מחק',
-            confirmButtonType: 'btn-danger'
-        });
+    // --- לוגיקת מחיקה ---
+    const handleDeleteRequest = () => {
+        setError('');
+        if (isSeries) {
+            setRecurrenceAction({ isOpen: true, type: 'delete' });
+        } else {
+            setConfirmState({
+                isOpen: true,
+                title: 'אישור מחיקת שיעור',
+                message: `האם אתה בטוח שברצונך למחוק את השיעור "${formData.name}"? כל המשתתפים הרשומים יוסרו.`,
+                onConfirm: () => performDelete('single'),
+                confirmText: 'כן, מחק',
+                confirmButtonType: 'btn-danger'
+            });
+        }
     };
 
-    const performDelete = async () => {
-        closeConfirmModal();
+    const performDelete = async (recurrenceMode) => {
+        setRecurrenceAction({ ...recurrenceAction, isOpen: false });
+        setConfirmState({ isOpen: false });
         setIsLoading(true); 
         setError('');
         try {
-            await api.delete(`/api/meetings/${meeting.id}`);
+            await api.delete(`/api/meetings/${meeting.id}?mode=${recurrenceMode}`);
             onSave();
         } catch (err) {
             setError(err.message || 'שגיאה במחיקת השיעור');
@@ -208,7 +312,7 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
                 <div className="modal-content" onClick={e => e.stopPropagation()}>
                     <button className="modal-close-btn" onClick={onClose}>&times;</button>
                     <h2>{isEditMode ? 'עריכת שיעור' : 'שיעור חדש'}</h2>
-                    <form onSubmit={handleSave} className="settings-form">
+                    <form onSubmit={handleSaveRequest} className="settings-form">
                         <div className="form-field">
                             <label>שם שיעור</label>
                             <input name="name" value={formData.name || ''} onChange={handleChange} required />
@@ -268,10 +372,59 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
                             {fieldErrors.participantIds && <p className="error field-error">{fieldErrors.participantIds}</p>}
                         </div>
 
+                        {/* אזור השיעורים החוזרים - מוצג רק ביצירה חדשה */}
+                        {!isEditMode && (
+                            <div className="recurrence-section" style={{ background: '#f8f9fa', padding: '15px', borderRadius: '8px', marginTop: '15px', marginBottom: '15px', border: '1px solid #e9ecef' }}>
+                                <div style={{ marginBottom: '10px' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontWeight: 'bold' }}>
+                                        <input
+                                            type="checkbox"
+                                            name="isRecurring"
+                                            checked={formData.isRecurring}
+                                            onChange={handleChange}
+                                            style={{ marginLeft: '10px', width: 'auto' }}
+                                        />
+                                        קבע כשיעור קבוע (סדרה)
+                                    </label>
+                                </div>
+
+                                {formData.isRecurring && (
+                                    <div className="recurrence-options" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <div className="form-field">
+                                            <label>תדירות</label>
+                                            <select
+                                                name="recurrenceType"
+                                                value={formData.recurrenceType}
+                                                onChange={handleChange}
+                                                className="form-control"
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                            >
+                                                <option value="weekly">כל שבוע (באותו יום)</option>
+                                                <option value="biweekly">כל שבועיים</option>
+                                                <option value="monthly">פעם בחודש (באותו תאריך)</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-field">
+                                            <label>עד תאריך</label>
+                                            <input
+                                                type="date"
+                                                name="recurrenceEndDate"
+                                                value={formData.recurrenceEndDate}
+                                                onChange={handleChange}
+                                                min={formData.date}
+                                                required={formData.isRecurring}
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {error && <p className="error">{error}</p>}
 
                         <div className="modal-actions">
-                            {isEditMode && <button type="button" className="btn btn-danger" onClick={handleDelete} disabled={isLoading}>מחק</button>}
+                            {isEditMode && <button type="button" className="btn btn-danger" onClick={handleDeleteRequest} disabled={isLoading}>מחק</button>}
                             
                             <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'שומר...' : 'שמור שינויים'}</button>
                         </div>
@@ -279,12 +432,20 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
                 </div>
             </div>
 
+            {/* Recurrence Action Modal - Now using Portal */}
+            <RecurrenceActionModal 
+                isOpen={recurrenceAction.isOpen}
+                onClose={() => setRecurrenceAction({ ...recurrenceAction, isOpen: false })}
+                onSelect={(mode) => recurrenceAction.type === 'save' ? performSave(mode) : performDelete(mode)}
+                actionType={recurrenceAction.type}
+            />
+
             <ConfirmModal
                 isOpen={confirmState.isOpen}
                 title={confirmState.title}
                 message={confirmState.message}
                 onConfirm={confirmState.onConfirm}
-                onCancel={closeConfirmModal}
+                onCancel={() => setConfirmState({ isOpen: false })}
                 confirmText={confirmState.confirmText || 'אישור'}
                 cancelText="ביטול"
                 confirmButtonType={confirmState.confirmButtonType || 'btn-danger'}

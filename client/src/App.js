@@ -18,7 +18,7 @@ import BookingErrorPage from './pages/BookingErrorPage';
 import OwnerDashboardPage from './pages/OwnerDashboardPage';
 import ForgotPassword from './pages/ForgotPassword'; 
 import ResetPassword from './pages/ResetPassword'; 
-import MyMembershipsPage from './pages/MyMembershipsPage'; // <-- הוסף את השורה הזו
+import MyMembershipsPage from './pages/MyMembershipsPage'; 
 import './App.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -39,6 +39,7 @@ const AppRoutes = () => {
             <Route path="/booking-error" element={<BookingErrorPage />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            
             <Route element={<MainLayout />}>
                 <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
                     <Route path="/owner-dashboard" element={<OwnerDashboardPage />} />
@@ -66,15 +67,23 @@ const AppRoutes = () => {
     );
 };
 
+// --- כאן השינוי: הזזת פירורי הלחם למקום קבוע ---
 const MainLayout = () => {
     return (
         <div className="layout-wrapper"> 
+            {/* 1. הדר קבוע */}
             <Navbar />
+            
+            {/* 2. פירורי לחם קבועים (אם קיימים, יופיעו כאן ולא יגללו) */}
             <Breadcrumbs />
-            <main className="main-content">
-                <Outlet />
-            </main>
-            <Footer />
+            
+            {/* 3. אזור הגלילה - מכיל רק את התוכן והפוטר */}
+            <div className="content-scroll-area">
+                <main className="main-content">
+                    <Outlet />
+                </main>
+                <Footer />
+            </div>
         </div>
     );
 };

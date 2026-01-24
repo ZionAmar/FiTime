@@ -84,7 +84,15 @@ function ManageSchedulePage() {
         try {
             const meetingsRes = await api.get('/api/meetings');
             if (Array.isArray(meetingsRes)) {
-                setEvents(meetingsRes.map(m => ({ ...m, title: m.name })));
+                // תיקון: מיפוי הנתונים לתוך extendedProps כדי ש-group_id יעבור למודל
+                setEvents(meetingsRes.map(m => ({
+                    ...m,
+                    title: m.name,
+                    extendedProps: {
+                        ...m, // מעביר את כל השדות כולל group_id, trainer_id וכו'
+                        group_id: m.group_id 
+                    }
+                })));
             }
         } catch (error) {
             setFetchError(error.message || "שגיאה בטעינת השיעורים.");
@@ -204,7 +212,20 @@ function ManageSchedulePage() {
         if (fetchError) return;
         if (clickInfo.event.display === 'background') return;
 
-        setSelectedMeeting({ id: clickInfo.event.id });
+        // תיקון: שליפת הנתונים מתוך extendedProps והעברתם למודל
+        const eventProps = clickInfo.event.extendedProps || {};
+        
+        setSelectedMeeting({
+            id: parseInt(clickInfo.event.id),
+            title: clickInfo.event.title,
+            start: clickInfo.event.start,
+            end: clickInfo.event.end,
+            // כאן הקסם: מעבירים את ה-group_id למודל
+            group_id: eventProps.group_id,
+            trainer_id: eventProps.trainer_id,
+            room_id: eventProps.room_id,
+            ...eventProps
+        });
     };
     
     const handleModalClose = () => {
@@ -260,6 +281,7 @@ function ManageSchedulePage() {
             <FullCalendar
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                height="80vh"
                 headerToolbar={{
                     left: 'prev,next today',
                     center: 'title',
