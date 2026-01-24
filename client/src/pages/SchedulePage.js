@@ -8,8 +8,6 @@ import api from '../services/api';
 import BookingModal from '../components/BookingModal';
 import TrainerViewModal from '../components/TrainerViewModal'; 
 import '../styles/FullCalendar.css';
-
-// 1. ייבוא הספרייה לחישוב תאריכים עבריים
 import { HebrewCalendar, Location } from '@hebcal/core';
 
 function SchedulePage() {
@@ -19,48 +17,42 @@ function SchedulePage() {
     const [fetchError, setFetchError] = useState(null);
     const { user, activeStudio, activeRole } = useAuth(); 
 
-    // פונקציית עזר לחישוב חגים ושבתות
     const getJewishHolidaysAndShabbat = () => {
         const year = new Date().getFullYear();
         const options = {
             year: year,
             isHebrewYear: false,
             candlelighting: false,
-            location: Location.lookup('Jerusalem'), // או טבריה אם יש תמיכה, ירושלים זה ברירת מחדל טובה לזמנים כלליים
+            location: Location.lookup('Jerusalem'),
             sedrot: false,
             omer: false,
         };
 
-        const events = HebrewCalendar.calendar(options);
+        const calEvents = HebrewCalendar.calendar(options);
         const holidayEvents = [];
 
-        // הוספת חגים מהלוח העברי
-        events.forEach(ev => {
-            // מסננים רק חגים משמעותיים (שבתון)
-            if (ev.getFlags() & (1 | 2)) { // 1=Yom Tov, 2=Shabbat (בערך, תלוי במימוש)
+        calEvents.forEach(ev => {
+            if (ev.getFlags() & (1 | 2)) { 
                  holidayEvents.push({
                     title: ev.render('he'),
                     start: ev.getDate().greg(),
                     allDay: true,
-                    display: 'background', // זה הופך את האירוע לרקע ולא לאירוע לחיץ
-                    backgroundColor: '#ffebee', // צבע אדמדם בהיר לחגים
-                    classNames: ['holiday-event'] // אפשר להוסיף CSS מותאם אישית
+                    display: 'background',
+                    backgroundColor: '#ffebee',
+                    classNames: ['holiday-event']
                 });
             }
         });
 
-        // הוספת שבתות באופן ידני (אם hebcal לא מחזיר את כל השבתות בצורה שרצינו)
-        // או פשוט להסתמך על זה שאנחנו חוסמים ימי שבת:
-        // FullCalendar יודע לטפל בשבתות ויזואלית, אבל אם רוצים כיתוב "שבת":
         let d = new Date(year, 0, 1);
         while (d.getFullYear() === year) {
-            if (d.getDay() === 6) { // 6 = Saturday
+            if (d.getDay() === 6) { 
                 holidayEvents.push({
                     title: 'שבת',
                     start: new Date(d),
                     allDay: true,
                     display: 'background',
-                    backgroundColor: '#f5f5f5', // אפור בהיר לשבת
+                    backgroundColor: '#f5f5f5',
                     classNames: ['shabbat-event']
                 });
             }
@@ -119,7 +111,6 @@ function SchedulePage() {
                     };
                 });
 
-                // 2. שילוב החגים והשבתות לתוך המערך הסופי
                 const holidays = getJewishHolidaysAndShabbat();
                 setEvents([...formattedEvents, ...holidays]);
             }
@@ -134,11 +125,9 @@ function SchedulePage() {
         fetchEvents();
     }, [fetchEvents]);
     
-    // לוגיקה למניעת לחיצה על שבת/חג (אם בטעות נוצר שם אירוע)
     const handleEventClick = (clickInfo) => {
         if (fetchError) return;
 
-        // אם לחצו על אירוע רקע (חג/שבת) - פשוט נתעלם
         if (clickInfo.event.display === 'background') return;
         
         if (activeRole === 'trainer') {
@@ -157,7 +146,19 @@ function SchedulePage() {
         }
     };
 
-    // ... שאר הקוד (Modals וכו') נשאר זהה ...
+    // --- הוספתי את הפונקציות החסרות כאן ---
+
+    const handleCloseModal = () => {
+        setSelectedEventForBooking(null);
+        setSelectedMeetingIdForTrainer(null);
+    };
+
+    const handleModalSave = () => {
+        handleCloseModal();
+        fetchEvents(); // רענון הנתונים אחרי שמירה/ביטול
+    };
+
+    // --------------------------------------
 
     return (
         <div className="container">
@@ -169,15 +170,14 @@ function SchedulePage() {
                 timeZone='local'
                 eventClick={handleEventClick}
                 dayMaxEvents={true}
-                // אפשר להוסיף גם businessHours כדי להחשיך ויזואלית את שבת
                 businessHours={{
-                    daysOfWeek: [0, 1, 2, 3, 4, 5], // ימים א-ו
+                    daysOfWeek: [0, 1, 2, 3, 4, 5], 
                     startTime: '06:00',
                     endTime: '22:00',
                 }}
+                height="80vh" // הוספתי גובה כדי למנוע גלילה כפולה בדף
             />
             
-            {/* ... Modals ... */}
              {selectedEventForBooking && (
                 <BookingModal 
                     event={selectedEventForBooking} 

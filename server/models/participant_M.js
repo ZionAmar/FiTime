@@ -1,5 +1,30 @@
 const db = require('../config/db_config');
 
+// --- פונקציית זמן ממוגנת (Robust) ---
+// פותרת בעיות של פורמט תאריך בשרתי לינוקס שונים
+const getLocalTime = () => {
+    const now = new Date();
+    const options = {
+        timeZone: "Asia/Jerusalem",
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    };
+    
+    // שימוש ב-Intl כדי לקבל את החלקים בנפרד ללא תלות במחרוזת
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const parts = formatter.formatToParts(now);
+    
+    const part = (type) => parts.find(p => p.type === type).value;
+    
+    // הרכבת המחרוזת בפורמט SQL בטוח: YYYY-MM-DD HH:mm:ss
+    return `${part('year')}-${part('month')}-${part('day')} ${part('hour')}:${part('minute')}:${part('second')}`;
+};
+
 const findExisting = (userId, meetingId) => {
     const query = `SELECT id FROM meeting_registrations WHERE user_id = ? AND meeting_id = ? AND status IN ('active', 'waiting', 'pending')`;
     return db.query(query, [userId, meetingId]);
@@ -7,8 +32,8 @@ const findExisting = (userId, meetingId) => {
 
 const add = (userId, meetingId, status, userMembershipId, connection) => {
     const dbOrConn = connection || db; 
-    const query = `INSERT INTO meeting_registrations (user_id, meeting_id, status, user_membership_id) VALUES (?, ?, ?, ?)`;
-    return dbOrConn.query(query, [userId, meetingId, status, userMembershipId]);
+    const query = `INSERT INTO meeting_registrations (user_id, meeting_id, status, user_membership_id, registered_at) VALUES (?, ?, ?, ?, ?)`;
+    return dbOrConn.query(query, [userId, meetingId, status, userMembershipId, getLocalTime()]);
 };
 
 const updateRegistrationStatus = (registrationId, status) => {
@@ -17,17 +42,20 @@ const updateRegistrationStatus = (registrationId, status) => {
 };
 
 const updatePendingStatus = (registrationId) => {
+    const currentTime = getLocalTime();
+    console.log(`Setting pending status for registration ${registrationId} at: ${currentTime}`);
     const query = `UPDATE meeting_registrations SET 
         status = 'pending', 
-        pending_sent_at = NOW(), 
+        pending_sent_at = ?, 
         notification_retries = 1 
         WHERE id = ?`;
-    return db.query(query, [registrationId]);
+    return db.query(query, [currentTime, registrationId]);
 };
 
 const setCheckInTime = (registrationId) => {
-    const query = 'UPDATE meeting_registrations SET status = \'checked_in\', check_in_time = NOW() WHERE id = ?';
-    return db.query(query, [registrationId]);
+    const currentTime = getLocalTime();
+    const query = 'UPDATE meeting_registrations SET status = \'checked_in\', check_in_time = ? WHERE id = ?';
+    return db.query(query, [currentTime, registrationId]);
 };
 
 const getRegistrationById = (registrationId) => {
@@ -111,27 +139,46 @@ const updateRegistrationStatusAndMembership = (registrationId, status, membershi
     return dbOrConn.query(query, [status, membershipId, registrationId]);
 };
 
-const findStalePendingRegistrations = (hours) => {
+const findStalePendingRegistrations = async (hours) => {
+    // חישוב זמן הסף (Cutoff) בצורה בטוחה
+    const now = new Date();
+    const cutoffDate = new Date(now.getTime() - (hours * 60 * 60 * 1000));
+    
+    // המרה לזמן ישראל באמצעות Intl
+    const options = {
+        timeZone: "Asia/Jerusalem",
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+    };
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const parts = formatter.formatToParts(cutoffDate);
+    const part = (type) => parts.find(p => p.type === type).value;
+    
+    const cutoffString = `${part('year')}-${part('month')}-${part('day')} ${part('hour')}:${part('minute')}:${part('second')}`;
+
+    console.log(`CRON Check: Finding pending registrations older than: ${cutoffString} (Israel Time)`);
+
     const query = `
         SELECT mr.*, u.phone, u.full_name
         FROM meeting_registrations mr
         JOIN users u ON mr.user_id = u.id
         WHERE mr.status = 'pending'
           AND mr.pending_sent_at IS NOT NULL
-          AND mr.pending_sent_at < NOW() - INTERVAL ? HOUR
+          AND mr.pending_sent_at < ? 
     `;
-    return db.query(query, [hours]);
+    return db.query(query, [cutoffString]);
 };
 
 const updateRetryTimestamp = (registrationId) => {
+    const currentTime = getLocalTime();
     const query = `UPDATE meeting_registrations SET
-        pending_sent_at = NOW(),
+        pending_sent_at = ?,
         notification_retries = notification_retries + 1
         WHERE id = ?`;
-    return db.query(query, [registrationId]);
+    return db.query(query, [currentTime, registrationId]);
 };
 
-// --- החדש: ספירת משתמשים בסטטוס pending ---
 const getPendingCount = async (meetingId) => {
     const query = `SELECT COUNT(*) as count FROM meeting_registrations WHERE meeting_id = ? AND status = 'pending'`;
     const [[result]] = await db.query(query, [meetingId]);
@@ -156,5 +203,6 @@ module.exports = {
     updateRegistrationStatusAndMembership,
     findStalePendingRegistrations,
     updateRetryTimestamp,
-    getPendingCount 
+    getPendingCount,
+    getLocalTime
 };

@@ -32,7 +32,6 @@ const addParticipant = async (user, meetingId, forceWaitlist = false) => {
         throw error;
     }
     
-    // בדיקת מנוי
     let validMembership = null;
     const [allUserRoles] = await userModel.findStudiosAndRolesByUserId(userId);
     const isOwner = allUserRoles.some(r => r.role_name === 'owner');
@@ -51,14 +50,12 @@ const addParticipant = async (user, meetingId, forceWaitlist = false) => {
         }
     }
 
-    // --- תיקון: מניעת חטיפת מקום ---
-    // סופרים גם את הרשומים בפועל וגם את אלו שקיבלו SMS (pending)
+    // חישוב תפוסה כולל ממתינים שקיבלו SMS
     const pendingCount = await participantModel.getPendingCount(meetingId);
     const effectiveParticipantCount = meeting.participant_count + pendingCount;
     
     const isFull = effectiveParticipantCount >= meeting.capacity;
-    // -------------------------------
-
+    
     let status = 'active';
     if (isFull) {
         if (!forceWaitlist) {
@@ -66,12 +63,11 @@ const addParticipant = async (user, meetingId, forceWaitlist = false) => {
             const waitlistCount = waitingList.length;
             
             let message = `השיעור מלא.`;
-            // אם המקום מלא "וירטואלית" בגלל ממתינים
             if (meeting.participant_count < meeting.capacity && pendingCount > 0) {
                  message = `ישנם מקומות אחרונים אך הם שמורים כרגע לממתינים שקיבלו הודעה. נסה שוב בעוד מספר דקות.`;
             }
             message += ` האם תרצה להצטרף לרשימת המתנה?`;
-            
+
             const error = new Error(message);
             error.status = 409;
             error.errorType = 'CLASS_FULL';
@@ -194,13 +190,33 @@ const confirmSpot = async (registrationId) => {
     if (!registration) {
         throw new Error('ההרשמה לא נמצאה.');
     }
+
+    // --- תיקון: בדיקת Idempotency (האם כבר אושר?) ---
+    if (registration.status === 'active') {
+        // אם המשתמש כבר פעיל, אנחנו מחזירים הצלחה ולא זורקים שגיאה
+        // זה קורה כשהמשתמש לוחץ פעמיים על הקישור או מרענן את הדף
+        console.log(`User already confirmed registration ${registrationId}. Returning success.`);
+        return { message: 'המקום אושר בהצלחה (כבר אושר קודם).' };
+    }
+    // ------------------------------------------------
+
+    // בדיקה: אם הסטטוס הוא לא pending ולא active (למשל cancelled או waiting)
     if (registration.status !== 'pending') {
-        throw new Error('המקום הזה כבר לא זמין.');
+        console.log(`ConfirmSpot Failed for ID: ${registrationId}. Current Status: ${registration.status}`);
+        
+        // בדיקה מיוחדת להודעת שגיאה ברורה יותר
+        if (registration.status === 'cancelled') {
+             throw new Error('הזמן לאישור עבר והמקום עבר לממתין הבא.');
+        } else if (registration.status === 'waiting') {
+             throw new Error('הוחזרת לרשימת ההמתנה.');
+        } else {
+             throw new Error('המקום הזה כבר לא זמין.');
+        }
     }
     
     const [[meeting]] = await meetingModel.getById(registration.meeting_id);
     
-    // בדיקה כפולה לוודא שלא נגנב מקום ברגע האחרון (אמורה להיות מיותרת עם התיקון, אבל לביטחון)
+    // בדיקה אחרונה לתפוסה (למקרה נדיר)
     if (meeting.participant_count >= meeting.capacity) {
         await participantModel.updateRegistrationStatus(registrationId, 'waiting');
         throw new Error('מצטערים, המקום נתפס. הוחזרת לרשימת ההמתנה.');
@@ -275,7 +291,8 @@ const startWaitingListCronJob = () => {
         console.log('CRON: Checking for stale pending registrations...');
         
         try {
-            const [staleRegistrations] = await participantModel.findStalePendingRegistrations(0.5);
+            // שימוש בפונקציה מהמודל שמחשבת זמן ב-NodeJS למניעת בעיות שעון
+            const [staleRegistrations] = await participantModel.findStalePendingRegistrations(0.5); // חצי שעה
             
             if (staleRegistrations.length === 0) {
                 console.log('CRON: No stale registrations found.');
@@ -293,8 +310,9 @@ const startWaitingListCronJob = () => {
                     await participantModel.updateRetryTimestamp(reg.id);
 
                 } else if (reg.notification_retries >= 2) {
-                    console.log(`CRON: Auto-cancelling registration ${reg.id} (60+ minutes passed)`);
+                    console.log(`CRON: Auto-cancelling registration ${reg.id} (Time expired)`);
                     
+                    // מעביר לבא בתור
                     await declineSpot(reg.id);
                 }
             }
