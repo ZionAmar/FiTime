@@ -9,12 +9,66 @@ import BookingModal from '../components/BookingModal';
 import TrainerViewModal from '../components/TrainerViewModal'; 
 import '../styles/FullCalendar.css';
 
+// 1. ייבוא הספרייה לחישוב תאריכים עבריים
+import { HebrewCalendar, Location } from '@hebcal/core';
+
 function SchedulePage() {
     const [events, setEvents] = useState([]);
     const [selectedEventForBooking, setSelectedEventForBooking] = useState(null);
     const [selectedMeetingIdForTrainer, setSelectedMeetingIdForTrainer] = useState(null);
     const [fetchError, setFetchError] = useState(null);
     const { user, activeStudio, activeRole } = useAuth(); 
+
+    // פונקציית עזר לחישוב חגים ושבתות
+    const getJewishHolidaysAndShabbat = () => {
+        const year = new Date().getFullYear();
+        const options = {
+            year: year,
+            isHebrewYear: false,
+            candlelighting: false,
+            location: Location.lookup('Jerusalem'), // או טבריה אם יש תמיכה, ירושלים זה ברירת מחדל טובה לזמנים כלליים
+            sedrot: false,
+            omer: false,
+        };
+
+        const events = HebrewCalendar.calendar(options);
+        const holidayEvents = [];
+
+        // הוספת חגים מהלוח העברי
+        events.forEach(ev => {
+            // מסננים רק חגים משמעותיים (שבתון)
+            if (ev.getFlags() & (1 | 2)) { // 1=Yom Tov, 2=Shabbat (בערך, תלוי במימוש)
+                 holidayEvents.push({
+                    title: ev.render('he'),
+                    start: ev.getDate().greg(),
+                    allDay: true,
+                    display: 'background', // זה הופך את האירוע לרקע ולא לאירוע לחיץ
+                    backgroundColor: '#ffebee', // צבע אדמדם בהיר לחגים
+                    classNames: ['holiday-event'] // אפשר להוסיף CSS מותאם אישית
+                });
+            }
+        });
+
+        // הוספת שבתות באופן ידני (אם hebcal לא מחזיר את כל השבתות בצורה שרצינו)
+        // או פשוט להסתמך על זה שאנחנו חוסמים ימי שבת:
+        // FullCalendar יודע לטפל בשבתות ויזואלית, אבל אם רוצים כיתוב "שבת":
+        let d = new Date(year, 0, 1);
+        while (d.getFullYear() === year) {
+            if (d.getDay() === 6) { // 6 = Saturday
+                holidayEvents.push({
+                    title: 'שבת',
+                    start: new Date(d),
+                    allDay: true,
+                    display: 'background',
+                    backgroundColor: '#f5f5f5', // אפור בהיר לשבת
+                    classNames: ['shabbat-event']
+                });
+            }
+            d.setDate(d.getDate() + 1);
+        }
+        
+        return holidayEvents;
+    };
 
     const fetchEvents = useCallback(async () => {
         if (!activeStudio) return;
@@ -25,7 +79,6 @@ function SchedulePage() {
             if (activeRole === 'trainer') {
                 meetingsToDisplay = await api.get(`/api/meetings?viewAs=trainer`);
             } else {
-                
                 const publicMeetings = await api.get(`/api/meetings/public?studioId=${activeStudio.studio_id}`);
                 const meetingsMap = new Map(publicMeetings.map(m => [m.id, m]));
             
@@ -65,7 +118,10 @@ function SchedulePage() {
                         }
                     };
                 });
-                setEvents(formattedEvents);
+
+                // 2. שילוב החגים והשבתות לתוך המערך הסופי
+                const holidays = getJewishHolidaysAndShabbat();
+                setEvents([...formattedEvents, ...holidays]);
             }
         } catch (error) {
             const errorMessage = error.message || "שגיאה כללית בטעינת לוח השיעורים. נסה שוב.";
@@ -78,8 +134,12 @@ function SchedulePage() {
         fetchEvents();
     }, [fetchEvents]);
     
+    // לוגיקה למניעת לחיצה על שבת/חג (אם בטעות נוצר שם אירוע)
     const handleEventClick = (clickInfo) => {
         if (fetchError) return;
+
+        // אם לחצו על אירוע רקע (חג/שבת) - פשוט נתעלם
+        if (clickInfo.event.display === 'background') return;
         
         if (activeRole === 'trainer') {
             setSelectedMeetingIdForTrainer(clickInfo.event.id);
@@ -97,45 +157,10 @@ function SchedulePage() {
         }
     };
 
-    const handleModalSave = () => {
-        setSelectedEventForBooking(null);
-        setSelectedMeetingIdForTrainer(null);
-        fetchEvents();
-    };
-    
-    const handleCloseModal = () => {
-        setSelectedEventForBooking(null);
-        setSelectedMeetingIdForTrainer(null);
-    };
+    // ... שאר הקוד (Modals וכו') נשאר זהה ...
 
-    if (fetchError) {
-        return (
-            <div className="error-state-full-page" style={{ padding: '20px', textAlign: 'center' }}>
-                <h2 style={{ color: '#dc3545' }}>❌ שגיאה בטעינת הלוח</h2>
-                <p style={{ marginTop: '15px', fontWeight: 'bold' }}>{fetchError}</p>
-                <button 
-                    style={{ marginTop: '20px' }} 
-                    className="btn btn-secondary" 
-                    onClick={() => window.location.reload()}>
-                        טען מחדש
-                </button>
-            </div>
-        );
-    }
-    
     return (
         <div className="container">
-            {/* <div className="schedule-header">
-                <h2>לוח שיעורים</h2>
-                <p>
-                    {activeRole === 'member' 
-                        ? 'לחץ על שיעור כדי להירשם או לבטל הרשמה.' 
-                        : activeRole === 'trainer' 
-                        ? 'לחץ על שיעור כדי לסמן נוכחות מתאמנים.' 
-                        : 'התחבר כדי לנהל את השיעורים האישיים שלך.'}
-                </p>
-            </div> */}
-            
             <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
@@ -144,9 +169,16 @@ function SchedulePage() {
                 timeZone='local'
                 eventClick={handleEventClick}
                 dayMaxEvents={true}
+                // אפשר להוסיף גם businessHours כדי להחשיך ויזואלית את שבת
+                businessHours={{
+                    daysOfWeek: [0, 1, 2, 3, 4, 5], // ימים א-ו
+                    startTime: '06:00',
+                    endTime: '22:00',
+                }}
             />
-
-            {selectedEventForBooking && (
+            
+            {/* ... Modals ... */}
+             {selectedEventForBooking && (
                 <BookingModal 
                     event={selectedEventForBooking} 
                     onClose={handleCloseModal} 

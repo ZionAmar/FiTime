@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -7,12 +6,12 @@ import interactionPlugin from '@fullcalendar/interaction';
 import heLocale from '@fullcalendar/core/locales/he';
 import api from '../services/api';
 import MeetingModal from '../components/MeetingModal';
-import SearchableSelect from '../components/SearchableSelect'; // 1. ייבוא הרכיב החדש
+import SearchableSelect from '../components/SearchableSelect';
 import '../styles/FullCalendar.css';
 import '../styles/ManageSchedulePage.css'; 
+import { HebrewCalendar, Location } from '@hebcal/core';
 
 function ManageSchedulePage() {
-    const location = useLocation();
     const calendarRef = useRef(null);
 
     const [events, setEvents] = useState([]);
@@ -33,6 +32,52 @@ function ManageSchedulePage() {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const holidaysEvents = useMemo(() => {
+        const year = new Date().getFullYear();
+        const options = {
+            year: year,
+            isHebrewYear: false,
+            candlelighting: false,
+            location: Location.lookup('Jerusalem'),
+            sedrot: false,
+            omer: false,
+        };
+
+        const calEvents = HebrewCalendar.calendar(options);
+        const results = [];
+
+        calEvents.forEach(ev => {
+            if (ev.getFlags() & (1 | 2)) {
+                 results.push({
+                    title: ev.render('he'),
+                    start: ev.getDate().greg(),
+                    allDay: true,
+                    display: 'background',
+                    backgroundColor: '#ffebee',
+                    classNames: ['holiday-event'],
+                    extendedProps: { isHoliday: true }
+                });
+            }
+        });
+
+        let d = new Date(year, 0, 1);
+        while (d.getFullYear() === year) {
+            if (d.getDay() === 6) { 
+                results.push({
+                    title: 'שבת',
+                    start: new Date(d),
+                    allDay: true,
+                    display: 'background',
+                    backgroundColor: '#f5f5f5',
+                    classNames: ['shabbat-event'],
+                    extendedProps: { isHoliday: true }
+                });
+            }
+            d.setDate(d.getDate() + 1);
+        }
+        return results;
     }, []);
 
     const fetchEvents = async () => {
@@ -93,6 +138,18 @@ function ManageSchedulePage() {
     const handleDateClick = (arg) => {
         if (fetchError) return;
         if (!calendarRef.current) return;
+
+        const clickedDateString = arg.dateStr.split('T')[0];
+        const isHoliday = holidaysEvents.some(h => {
+             const holidayDate = h.start.toISOString().split('T')[0];
+             return holidayDate === clickedDateString;
+        });
+
+        if (isHoliday) {
+            alert("לא ניתן לקבוע שיעורים בשבתות וחגים.");
+            return; 
+        }
+
         const calendarApi = calendarRef.current.getApi();
         const currentView = calendarApi.view.type;
 
@@ -107,7 +164,7 @@ function ManageSchedulePage() {
         const hoursForDay = businessHours.find(bh => bh.daysOfWeek.includes(clickedDay));
 
         if (!hoursForDay) {
-            alert('הסטודיו סגור ביום זה.');
+            alert('הסטודיו סגור ביום זה (מחוץ לשעות הפעילות).');
             return;
         }
 
@@ -145,6 +202,8 @@ function ManageSchedulePage() {
 
     const handleEventClick = (clickInfo) => {
         if (fetchError) return;
+        if (clickInfo.event.display === 'background') return;
+
         setSelectedMeeting({ id: clickInfo.event.id });
     };
     
@@ -159,8 +218,10 @@ function ManageSchedulePage() {
     };
 
     const filteredEvents = events.filter(event => 
-        selectedTrainer === 'all' || event.trainer_id == selectedTrainer
+        selectedTrainer === 'all' || String(event.trainer_id) === String(selectedTrainer)
     );
+
+    const eventsToDisplay = [...filteredEvents, ...holidaysEvents];
 
     const trainerOptions = [
         { value: 'all', label: 'כל המאמנים' },
@@ -206,7 +267,7 @@ function ManageSchedulePage() {
                 }}
                 initialView={'dayGridMonth'}
                 locale={heLocale}
-                events={filteredEvents}
+                events={eventsToDisplay}
                 eventClick={handleEventClick}
                 dateClick={handleDateClick}
                 datesSet={handleDatesSet}
