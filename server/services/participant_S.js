@@ -191,20 +191,15 @@ const confirmSpot = async (registrationId) => {
         throw new Error('ההרשמה לא נמצאה.');
     }
 
-    // --- תיקון: בדיקת Idempotency (האם כבר אושר?) ---
+    // בדיקת Idempotency (למקרה שהמשתמש כבר אישר)
     if (registration.status === 'active') {
-        // אם המשתמש כבר פעיל, אנחנו מחזירים הצלחה ולא זורקים שגיאה
-        // זה קורה כשהמשתמש לוחץ פעמיים על הקישור או מרענן את הדף
         console.log(`User already confirmed registration ${registrationId}. Returning success.`);
         return { message: 'המקום אושר בהצלחה (כבר אושר קודם).' };
     }
-    // ------------------------------------------------
 
-    // בדיקה: אם הסטטוס הוא לא pending ולא active (למשל cancelled או waiting)
     if (registration.status !== 'pending') {
         console.log(`ConfirmSpot Failed for ID: ${registrationId}. Current Status: ${registration.status}`);
         
-        // בדיקה מיוחדת להודעת שגיאה ברורה יותר
         if (registration.status === 'cancelled') {
              throw new Error('הזמן לאישור עבר והמקום עבר לממתין הבא.');
         } else if (registration.status === 'waiting') {
@@ -216,7 +211,6 @@ const confirmSpot = async (registrationId) => {
     
     const [[meeting]] = await meetingModel.getById(registration.meeting_id);
     
-    // בדיקה אחרונה לתפוסה (למקרה נדיר)
     if (meeting.participant_count >= meeting.capacity) {
         await participantModel.updateRegistrationStatus(registrationId, 'waiting');
         throw new Error('מצטערים, המקום נתפס. הוחזרת לרשימת ההמתנה.');
@@ -291,8 +285,8 @@ const startWaitingListCronJob = () => {
         console.log('CRON: Checking for stale pending registrations...');
         
         try {
-            // שימוש בפונקציה מהמודל שמחשבת זמן ב-NodeJS למניעת בעיות שעון
-            const [staleRegistrations] = await participantModel.findStalePendingRegistrations(0.5); // חצי שעה
+            // שינוי: שליחת 30 דקות למודל, כדי שה-SQL יבצע את החישוב
+            const [staleRegistrations] = await participantModel.findStalePendingRegistrations(30);
             
             if (staleRegistrations.length === 0) {
                 console.log('CRON: No stale registrations found.');
@@ -312,7 +306,6 @@ const startWaitingListCronJob = () => {
                 } else if (reg.notification_retries >= 2) {
                     console.log(`CRON: Auto-cancelling registration ${reg.id} (Time expired)`);
                     
-                    // מעביר לבא בתור
                     await declineSpot(reg.id);
                 }
             }

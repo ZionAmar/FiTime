@@ -1,7 +1,7 @@
 const db = require('../config/db_config');
 
-// --- פונקציית זמן ממוגנת (Robust) ---
-// פותרת בעיות של פורמט תאריך בשרתי לינוקס שונים
+// --- פונקציית זמן ממוגנת (Node.js Master Time) ---
+// מייצרת זמן ישראל בפורמט שה-DB מבין כמחרוזת, בלי להסתמך על הגדרות השרת
 const getLocalTime = () => {
     const now = new Date();
     const options = {
@@ -15,13 +15,12 @@ const getLocalTime = () => {
         hour12: false
     };
     
-    // שימוש ב-Intl כדי לקבל את החלקים בנפרד ללא תלות במחרוזת
     const formatter = new Intl.DateTimeFormat('en-US', options);
     const parts = formatter.formatToParts(now);
     
     const part = (type) => parts.find(p => p.type === type).value;
     
-    // הרכבת המחרוזת בפורמט SQL בטוח: YYYY-MM-DD HH:mm:ss
+    // YYYY-MM-DD HH:mm:ss
     return `${part('year')}-${part('month')}-${part('day')} ${part('hour')}:${part('minute')}:${part('second')}`;
 };
 
@@ -30,6 +29,7 @@ const findExisting = (userId, meetingId) => {
     return db.query(query, [userId, meetingId]);
 };
 
+// שינוי: שימוש ב-getLocalTime() במקום NOW()
 const add = (userId, meetingId, status, userMembershipId, connection) => {
     const dbOrConn = connection || db; 
     const query = `INSERT INTO meeting_registrations (user_id, meeting_id, status, user_membership_id, registered_at) VALUES (?, ?, ?, ?, ?)`;
@@ -41,9 +41,12 @@ const updateRegistrationStatus = (registrationId, status) => {
     return db.query(query, [status, registrationId]);
 };
 
+// שינוי: שימוש ב-getLocalTime() לעדכון זמן
 const updatePendingStatus = (registrationId) => {
     const currentTime = getLocalTime();
-    console.log(`Setting pending status for registration ${registrationId} at: ${currentTime}`);
+    // לוג כדי שתוכל לראות בדיוק מה נשמר
+    console.log(`Setting pending status for ID ${registrationId} at: ${currentTime}`);
+    
     const query = `UPDATE meeting_registrations SET 
         status = 'pending', 
         pending_sent_at = ?, 
@@ -52,10 +55,10 @@ const updatePendingStatus = (registrationId) => {
     return db.query(query, [currentTime, registrationId]);
 };
 
+// שינוי: שימוש ב-getLocalTime()
 const setCheckInTime = (registrationId) => {
-    const currentTime = getLocalTime();
     const query = 'UPDATE meeting_registrations SET status = \'checked_in\', check_in_time = ? WHERE id = ?';
-    return db.query(query, [currentTime, registrationId]);
+    return db.query(query, [getLocalTime(), registrationId]);
 };
 
 const getRegistrationById = (registrationId) => {
@@ -139,12 +142,14 @@ const updateRegistrationStatusAndMembership = (registrationId, status, membershi
     return dbOrConn.query(query, [status, membershipId, registrationId]);
 };
 
-const findStalePendingRegistrations = async (hours) => {
-    // חישוב זמן הסף (Cutoff) בצורה בטוחה
+// --- החלק הקריטי: חישוב Expiration ב-Node.js ---
+const findStalePendingRegistrations = async (minutes) => {
+    // 1. מחשבים את הזמן הנוכחי
     const now = new Date();
-    const cutoffDate = new Date(now.getTime() - (hours * 60 * 60 * 1000));
+    // 2. מפחיתים את הדקות
+    const cutoffDate = new Date(now.getTime() - (minutes * 60000));
     
-    // המרה לזמן ישראל באמצעות Intl
+    // 3. ממירים את זמן ה-Cutoff לפורמט ישראל
     const options = {
         timeZone: "Asia/Jerusalem",
         year: 'numeric', month: '2-digit', day: '2-digit',
@@ -155,10 +160,12 @@ const findStalePendingRegistrations = async (hours) => {
     const parts = formatter.formatToParts(cutoffDate);
     const part = (type) => parts.find(p => p.type === type).value;
     
+    // זה הזמן "לפני X דקות" לפי שעון ישראל
     const cutoffString = `${part('year')}-${part('month')}-${part('day')} ${part('hour')}:${part('minute')}:${part('second')}`;
 
-    console.log(`CRON Check: Finding pending registrations older than: ${cutoffString} (Israel Time)`);
+    console.log(`CRON: Checking for registrations older than: ${cutoffString}`);
 
+    // 4. משווים מחרוזת למחרוזת. זה עוקף את הבעיה של MySQL.
     const query = `
         SELECT mr.*, u.phone, u.full_name
         FROM meeting_registrations mr
@@ -170,13 +177,13 @@ const findStalePendingRegistrations = async (hours) => {
     return db.query(query, [cutoffString]);
 };
 
+// שינוי: שימוש ב-getLocalTime()
 const updateRetryTimestamp = (registrationId) => {
-    const currentTime = getLocalTime();
     const query = `UPDATE meeting_registrations SET
         pending_sent_at = ?,
         notification_retries = notification_retries + 1
         WHERE id = ?`;
-    return db.query(query, [currentTime, registrationId]);
+    return db.query(query, [getLocalTime(), registrationId]);
 };
 
 const getPendingCount = async (meetingId) => {
