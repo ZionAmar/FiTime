@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { TypeAnimation } from 'react-type-animation';
 import LandingPageHeader from '../components/LandingPageHeader';
 import WhatsAppButton from '../components/WhatsAppButton';
-import '../styles/HomePage.css';
+import '../styles/HomePage.css'; 
 import '../styles/Animations.css';
 
 function HomePage() {
@@ -15,88 +15,83 @@ function HomePage() {
       <WhatsAppButton phoneNumber="972549774827" />
 
       <div className="landing-page-v6">
+        
         {/* --- HERO SECTION --- */}
         <header className="hero-section-v6">
           <div className="hero-overlay"></div>
-          <div className="hero-content animate-on-load">
+          
+          <div className="hero-content">
+            <div className="launch-badge">
+              <span>🚀</span>
+              <span className="launch-badge-text">
+                מבצע השקה: חודשיים ראשונים עלינו!
+              </span>
+            </div>
+
             <h1 className="hero-title">
               הגיע הזמן לנהל את הסטודיו,<br />
               במקום שהסטודיו ינהל אותך.
             </h1>
+            
             <p className="hero-subtitle">
-              FiTime היא המערכת שעושה סדר ביומן, חוסכת לך שעות של התעסקות בוואטסאפ, ומנהלת את רשימות ההמתנה והכרטיסיות באופן אוטומטי.
+              FiTime עושה סדר ביומן, חוסכת שעות של התעסקות בוואטסאפ, ומנהלת את רשימות ההמתנה והכרטיסיות באופן אוטומטי לחלוטין.
             </p>
-            
-            {/* באנר מבצע השקה */}
-            <div className="launch-offer-badge" style={{ 
-                background: 'rgba(255,255,255,0.15)', 
-                backdropFilter: 'blur(10px)',
-                padding: '12px 25px', 
-                borderRadius: '50px', 
-                marginBottom: '25px',
-                border: '1px solid #ffd700',
-                display: 'inline-block',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
-            }}>
-                <span style={{ color: '#ffd700', fontWeight: 'bold', fontSize: '1.2rem' }}>🚀 מבצע השקה:</span>
-                <span style={{ color: '#fff', marginLeft: '10px', fontSize: '1.1rem' }}>נרשמים היום ומקבלים חודשיים ראשונים במתנה!</span>
-            </div>
 
-            <TypeAnimation
-              sequence={[
-                'סוף להודעות וואטסאפ בלילה', 2000,
-                'רשימות המתנה שעובדות לבד', 2000,
-                'מעקב מדויק אחרי כרטיסיות', 2000,
-                'מערכת שעות דיגיטלית', 3000,
-              ]}
-              wrapper="div"
-              cursor={true}
-              repeat={Infinity}
-              className="animated-text"
-            />
+            <div className="animated-text-wrapper">
+                <TypeAnimation
+                sequence={[
+                    'סוף להודעות וואטסאפ בלילה', 2000,
+                    'רשימות המתנה שעובדות לבד', 2000,
+                    'מעקב מדויק אחרי כרטיסיות', 2000,
+                    'מערכת שעות דיגיטלית ומעוצבת', 3000,
+                ]}
+                wrapper="span"
+                cursor={true}
+                repeat={Infinity}
+                className="animated-text"
+                />
+            </div>
             
-            <div style={{ marginTop: '30px' }}>
-              <button className="btn btn-primary hero-cta-button" onClick={() => navigate('/register')}>
-                התחילו עכשיו - חינם לחודשיים
+            <div>
+              <button className="hero-cta-button" onClick={() => navigate('/register')}>
+                התחילו עכשיו בחינם 👈
               </button>
-              <p style={{ marginTop: '10px', fontSize: '0.9rem', opacity: 0.8 }}>ללא פרטי אשראי | ללא התחייבות</p>
+              <p style={{ marginTop: '12px', fontSize: '0.85rem', opacity: 0.8 }}>
+                ללא פרטי אשראי • ללא התחייבות
+              </p>
             </div>
           </div>
         </header>
 
-        {/* --- PROBLEM / SOLUTION SECTION --- */}
-        <section className="features-grid-section fade-in" style={{ padding: '4rem 2rem', background: '#f8f9fa' }}>
-          <div className="container">
-            <h2 className="section-title" style={{ color: '#333', textAlign: 'center', marginBottom: '3rem' }}>למה בעלי סטודיו עוברים ל-FiTime?</h2>
+        {/* --- FEATURES GRID --- */}
+        <section className="features-section">
+          <div className="container-custom">
+            <h2 className="section-title">למה מנהלי סטודיו עוברים ל-FiTime?</h2>
             
-            <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+            <div className="features-grid">
               
-              {/* Feature 1 - אמת: זה עובד בקוד שלך */}
-              <div className="feature-card" style={{ background: '#fff', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 20px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
-                <h3 style={{ marginBottom: '1rem' }}>רשימת המתנה אוטומטית</h3>
-                <p style={{ color: '#666', lineHeight: '1.6' }}>
-                  מתאמן ביטל ברגע האחרון? המערכת תזהה את זה, תשלח SMS לממתינים, ותשבץ את הראשון שיאשר. 
-                  <strong>התוצאה: 0 חורים בלו"ז במינימום מאמץ.</strong>
+              <div className="feature-card">
+                <div className="feature-icon">🤖</div>
+                <h3>רשימת המתנה אוטומטית</h3>
+                <p>
+                  מתאמן ביטל? המערכת תזהה את זה, תשלח SMS לממתינים, ותשבץ את הראשון שיאשר. 
+                  <strong> אפס חורים בלו"ז במינימום מאמץ.</strong>
                 </p>
               </div>
 
-              {/* Feature 2 - אמת: האתר רספונסיבי ועובד בטלפון */}
-              <div className="feature-card" style={{ background: '#fff', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 20px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📱</div>
-                <h3 style={{ marginBottom: '1rem' }}>רישום עצמאי מהנייד</h3>
-                <p style={{ color: '#666', lineHeight: '1.6' }}>
-                  שחררו את הטלפון שלכם. המתאמנים נרשמים, מבטלים ורואים כמה ניקובים נשארו להם ישירות מהטלפון שלהם.
-                  אתם מקבלים שקט נפשי.
+              <div className="feature-card">
+                <div className="feature-icon">📱</div>
+                <h3>רישום עצמאי באפליקציה</h3>
+                <p>
+                  שחררו את הטלפון. המתאמנים נרשמים, מבטלים ורואים כמה ניקובים נשארו להם ישירות מהטלפון.
                 </p>
               </div>
 
-              {/* Feature 3 - אמת: יש דאשבורד ניהול וניהול יומן */}
-              <div className="feature-card" style={{ background: '#fff', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 20px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
-                <h3 style={{ marginBottom: '1rem' }}>שליטה וסדר ביומן</h3>
-                <p style={{ color: '#666', lineHeight: '1.6' }}>
-                  לוח שנה צבעוני וברור שמראה לכם בדיוק מה קורה בסטודיו: איזה שיעורים מלאים, מי המאמן, וכמה נרשמו לכל שיעור.
+              <div className="feature-card">
+                <div className="feature-icon">📊</div>
+                <h3>שליטה וסדר ביומן</h3>
+                <p>
+                  דאשבורד צבעוני וברור שמראה לכם בדיוק מה קורה בסטודיו בזמן אמת: נוכחות, כספים וביצועים.
                 </p>
               </div>
 
@@ -105,64 +100,66 @@ function HomePage() {
         </section>
 
         {/* --- DEEP DIVE SECTION --- */}
-        <section id="features" className="persona-section owner-section fade-in">
-          <div className="persona-content container">
-            <div className="persona-text">
-              <span className="section-tag">החלק האהוב על המנהלים</span>
-              <h2 className="persona-title">ניהול מנויים וכרטיסיות</h2>
-              <p>
-                החלק הכי מתסכל בניהול סטודיו הוא המעקב אחרי ניקובים ("כמה נשאר לי?").
-                ב-FiTime, המערכת סופרת את הניקובים אוטומטית בכל הרשמה, וחוסמת רישום כשנגמרת הכרטיסייה.
-              </p>
-              <ul style={{ marginTop: '1.5rem', listStyle: 'none', padding: 0 }}>
-                {/* אמת: המערכת בודקת memberships וחוסמת אם אין ניקובים */}
-                <li style={{ marginBottom: '10px' }}>✅ חסימת הרשמה כשנגמר המנוי</li>
-                <li style={{ marginBottom: '10px' }}>✅ שקיפות מלאה למתאמן על יתרת הניקובים</li>
-                <li style={{ marginBottom: '10px' }}>✅ היסטוריית שיעורים לכל מתאמן</li>
-              </ul>
-            </div>
-            <div className="persona-image-container">
-              <img src="/images/owner-dashboard.png" alt="ניהול יומן ומנויים" style={{ borderRadius: '10px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }} />
+        <section id="features" className="owner-section">
+          <div className="container-custom">
+            <div className="owner-content-wrapper">
+              
+              <div className="owner-text">
+                <span className="tag-label">החלק האהוב על המנהלים</span>
+                <h2 className="owner-title">ניהול מנויים וכרטיסיות ללא כאב ראש</h2>
+                <p style={{ fontSize: '1.1rem', color: '#475569' }}>
+                  החלק הכי מתסכל בניהול סטודיו הוא המעקב אחרי ניקובים ("כמה נשאר לי?").
+                  ב-FiTime, המערכת סופרת את הניקובים אוטומטית וחוסמת רישום כשנגמרת הכרטיסייה.
+                </p>
+                <ul className="check-list">
+                  <li><span className="check-mark">✓</span> חסימת הרשמה כשנגמר המנוי</li>
+                  <li><span className="check-mark">✓</span> שקיפות מלאה למתאמן על יתרת הניקובים</li>
+                  <li><span className="check-mark">✓</span> הפקת דוחות נוכחות בלחיצה</li>
+                </ul>
+              </div>
+
+              <div className="owner-image-wrapper">
+                <img src="/images/owner-dashboard.png" alt="ניהול יומן ומנויים" />
+              </div>
+
             </div>
           </div>
         </section>
 
         {/* --- PRICING SECTION --- */}
-        <section id="pricing" className="pricing-section fade-in">
-            <div className="container">
-              <h2 className="section-title">הצטרפו עכשיו ללא סיכון</h2>
-              <div className="pricing-card-wrapper">
-                <div className="pricing-card" style={{ border: '2px solid #4caf50', transform: 'scale(1.05)' }}>
+        <section id="pricing" className="pricing-section">
+            <div className="container-custom">
+              <h2 className="section-title">מסלול ה-Founder שלנו</h2>
+              
+              <div className="pricing-card-container">
+                <div className="pricing-card">
                   
-                  <div style={{ 
-                      background: '#4caf50', color: 'white', padding: '5px 10px', 
-                      borderRadius: '20px', fontSize: '0.9rem', fontWeight: 'bold',
-                      position: 'absolute', top: '-15px', right: '50%', transform: 'translateX(50%)' 
-                  }}>
+                  <div className="best-value-badge">
                       הכי משתלם
                   </div>
 
-                  <h3 className="pricing-title">FiTime Founder</h3>
+                  <h3 style={{ fontSize: '1.5rem', margin: 0 }}>FiTime Premium</h3>
                   
-                  <div className="price">₪0<span className="price-term">/ חודשיים ראשונים</span></div>
-                  <p className="pricing-subtitle" style={{textDecoration: 'line-through', opacity: 0.6}}>במקום ₪299 לחודש</p>
-                  <p className="pricing-subtitle" style={{color: '#2e7d32', fontWeight: 'bold', marginBottom: '20px'}}>
-                      מתנה למצטרפים בתקופת ההשקה!
-                  </p>
+                  <div className="price-large">₪0</div>
+                  <div className="price-period">לחודשיים הראשונים</div>
+                  <div className="old-price">במקום ₪299 לחודש</div>
+                  
+                  <div className="gift-text">
+                      🎁 הטבה ייחודית לתקופת ההשקה!
+                  </div>
 
-                  <ul className="pricing-features">
-                    <li>✅ <strong>ללא הגבלת</strong> מתאמנים</li>
-                    <li>✅ <strong>ללא הגבלת</strong> כמות שיעורים</li>
-                    <li>✅ ניהול יומן, מנויים וכרטיסיות</li>
-                    <li>✅ רשימות המתנה אוטומטיות (SMS)</li>
-                    <li>✅ גישה מלאה מכל טלפון ומחשב</li>
-                    <li>✅ תמיכה אישית בווטסאפ</li>
+                  <ul className="check-list pricing-features">
+                    <li><span className="check-mark">✓</span> ללא הגבלת מתאמנים</li>
+                    <li><span className="check-mark">✓</span> ללא הגבלת כמות שיעורים</li>
+                    <li><span className="check-mark">✓</span> ניהול יומן, מנויים וכרטיסיות</li>
+                    <li><span className="check-mark">✓</span> רשימות המתנה אוטומטיות (SMS)</li>
+                    <li><span className="check-mark">✓</span> תמיכה אישית בוואטסאפ</li>
                   </ul>
                   
-                  <button className="btn btn-primary" style={{width: '100%', fontSize: '1.1rem', padding: '15px'}} onClick={() => navigate('/register')}>
-                    אני רוצה להצטרף בחינם 👈
+                  <button className="btn-block" onClick={() => navigate('/register')}>
+                    אני רוצה להצטרף בחינם
                   </button>
-                  <p style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.8rem', color: '#666' }}>
+                  <p style={{ marginTop: '15px', fontSize: '0.8rem', color: '#94a3b8' }}>
                       ההרשמה לוקחת דקה. אין צורך בפרטי אשראי.
                   </p>
                 </div>
@@ -171,8 +168,8 @@ function HomePage() {
         </section>
 
         <footer className="lp-footer">
-          <div className="footer-bottom">
-            © {new Date().getFullYear()} FiTime. מערכת לניהול סטודיו פילאטיס וכושר.
+          <div className="container-custom">
+            © {new Date().getFullYear()} FiTime. כל הזכויות שמורות.
           </div>
         </footer>
       </div>
