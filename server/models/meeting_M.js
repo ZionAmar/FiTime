@@ -108,12 +108,16 @@ const getPublicSchedule = (studioId, date) => {
 };
 
 const getById = (id) => {
-    // הוספתי m.group_id באופן מפורש ליתר ביטחון, למרות ש-m.* אמור לתפוס אותו
+    // הוספתי את s.name as studio_name ואת ה-JOIN לטבלת studios
     const query = `
-        SELECT m.*, m.group_id, r.name as roomName, r.capacity, u.full_name as trainerName 
+        SELECT m.*, m.group_id, 
+               r.name as roomName, r.capacity, 
+               u.full_name as trainerName,
+               s.name as studio_name
         FROM meetings m 
         JOIN rooms r ON m.room_id = r.id 
         JOIN users u ON m.trainer_id = u.id
+        JOIN studios s ON m.studio_id = s.id 
         WHERE m.id = ?
     `;
     return db.query(query, [id]);

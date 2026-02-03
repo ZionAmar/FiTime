@@ -4,7 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import ConfirmModal from './ConfirmModal';
 import '../styles/UserModal.css';
 import '../styles/AdminTabs.css'; 
+// ייבוא הולידציה
+import { validatePhone, validateEmail } from '../utils/validation';
 
+// --- קומפוננטת משנה לניהול מנויים ---
 function MembershipsTab({ user, products }) {
     const [memberships, setMemberships] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -108,6 +111,7 @@ function MembershipsTab({ user, products }) {
     );
 }
 
+// --- הקומפוננטה הראשית ---
 function UserModal({ user, onSave, onClose, defaultRole }) {
     const { activeStudio } = useAuth();
     const isEditMode = Boolean(user);
@@ -202,15 +206,43 @@ function UserModal({ user, onSave, onClose, defaultRole }) {
         e.preventDefault();
         setIsLoading(true);
         resetErrors();
+
+        // --- ולידציה של המידע ---
+        const errors = {};
+
+        // 1. בדיקת טלפון (קריטי!)
+        const phoneCheck = validatePhone(formData.phone);
+        if (!phoneCheck.isValid) {
+            errors.phone = phoneCheck.error;
+        }
+
+        // 2. בדיקת מייל (רק אם הוזן)
+        if (formData.email) {
+            const emailCheck = validateEmail(formData.email);
+            if (!emailCheck.isValid) {
+                errors.email = emailCheck.error;
+            }
+        }
+
+        // אם יש שגיאות - לא שולחים
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors);
+            setIsLoading(false);
+            return;
+        }
+        // -------------------------
+
         try {
+            // מעדכנים את הטלפון לגרסה הנקייה
+            const dataToSend = { ...formData, phone: phoneCheck.value };
+
             if (isEditMode) {
-                const dataToSend = { ...formData };
                 if (!dataToSend.pass) {
                     delete dataToSend.pass;
                 }
                 await api.put(`/api/users/${user.id}`, dataToSend);
             } else {
-                const payload = { ...formData, roles: [defaultRole] };
+                const payload = { ...dataToSend, roles: [defaultRole] };
                 await api.post('/api/users', payload);
             }
             onSave();
@@ -302,7 +334,15 @@ function UserModal({ user, onSave, onClose, defaultRole }) {
                                         </div>
                                         <div className="form-field">
                                             <label>טלפון</label>
-                                            <input name="phone" value={formData.phone || ''} onChange={handleChange} required />
+                                            <input 
+                                                name="phone" 
+                                                value={formData.phone || ''} 
+                                                onChange={handleChange} 
+                                                required 
+                                                placeholder="050-0000000"
+                                                dir="ltr"
+                                            />
+                                            {fieldErrors.phone && <p className="error field-error">{fieldErrors.phone}</p>}
                                         </div>
                                         <div className="form-field">
                                             <label>{isEditMode ? 'סיסמה חדשה (אופציונלי)' : 'סיסמה'}</label>
@@ -365,11 +405,11 @@ function UserModal({ user, onSave, onClose, defaultRole }) {
                 isOpen={confirmState.isOpen}
                 title={confirmState.title}
                 message={confirmState.message}
-                onConfirm={performDelete}
-                onCancel={closeConfirmModal}
+                onConfirm={confirmState.onConfirm}
+                onCancel={() => setConfirmState({ isOpen: false })}
                 confirmText={confirmState.confirmText || 'אישור'}
                 cancelText="ביטול"
-                confirmButtonType={confirmState.confirmButtonType || 'btn-danger'}
+                confirmButtonType={confirmState.confirmButtonType || 'btn-primary'}
             />
         </>
     );

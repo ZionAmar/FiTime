@@ -1,74 +1,91 @@
-const twilio = require('twilio');
+const axios = require('axios');
 const meetingModel = require('../models/meeting_M');
 require('dotenv').config();
 
-const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
-const FROM = process.env.TWILIO_SMS_NUMBER;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+const API_URL = 'https://www.019sms.co.il/api';
 
-/**
- * @param {string} to - מספר הטלפון
- * @param {number} meetingId - ID השיעור
- * @param {number} registrationId - ID הרישום
- * @param {boolean} isReminder - האם זו הודעת תזכורת (ההזדמנות השנייה)
- */
 async function sendSmsWithConfirmLink(to, meetingId, registrationId, isReminder = false) {
-    try {
-        const [[meeting]] = await meetingModel.getById(meetingId);
-        if (!meeting) {
-            const error = new Error(`לא ניתן למצוא את השיעור (ID ${meetingId}) לצורך שליחת SMS.`);
-            error.status = 404;
-            throw error;
-        }
+    try {
+        const [[meeting]] = await meetingModel.getById(meetingId);
+        if (!meeting) {
+            console.error(`❌ SMS Error: Meeting ID ${meetingId} not found.`);
+            return;
+        }
 
-        const meetingDate = new Date(meeting.date).toLocaleDateString('he-IL', {day: '2-digit', month: '2-digit', year: 'numeric'});
-        const meetingTime = meeting.start_time.slice(0, 5);
+        // כאן הקסם: לוקחים את שם הסטודיו מה-DB, או כותבים "הסטודיו" אם אין שם
+        const studioName = meeting.studio_name || 'הסטודיו';
 
+        const meetingDate = new Date(meeting.date).toLocaleDateString('he-IL', {day: '2-digit', month: '2-digit'});
+        const meetingTime = meeting.start_time.slice(0, 5);
+        
         const confirmLink = `${process.env.SERVER_URL}/api/participants/confirm/${registrationId}`;
         const declineLink = `${process.env.SERVER_URL}/api/participants/decline/${registrationId}`;
 
         let messageBody = '';
 
+        // --- עיצוב ההודעה עם שם הסטודיו ---
+        
         if (isReminder) {
-            messageBody = `תזכורת מ-FiTime: עדיין מחכים לאישור שלך לשיעור '${meeting.name}' בתאריך ${meetingDate} בשעה ${meetingTime}.
-אם לא תגיב בשעות הקרובות, הרשמתך תבוטל אוטומטית והמקום יעבור לבא בתור.
-אשר: ${confirmLink}
-בטל: ${declineLink}`;
-        } else {
-            messageBody = `היי מ-FiTime! התפנה מקום בשיעור שרצית:
-✨ שיעור: ${meeting.name}
-📅 תאריך: ${meetingDate}
-⏰ שעה: ${meetingTime}
+            messageBody = `תזכורת מ-${studioName} ⏳
+שמרנו לך מקום בשיעור ${meeting.name}!
+📅 מתי: ${meetingDate} ב-${meetingTime}
 
-לאישור ההרשמה:
+המקום שמור לזמן מוגבל, נא לאשר הגעה:
+✅ לאישור: ${confirmLink}
+
+❌ לביטול: ${declineLink}`;
+
+        } else {
+            messageBody = `היי, חדשות טובות מ-${studioName}! 🥳
+התפנה מקום בשיעור שרצית: ${meeting.name}
+📅 מתי: ${meetingDate} ב-${meetingTime}
+
+רוצה להצטרף?
+✅ לחץ לאישור מיידי:
 ${confirmLink}
 
-לוויתור על המקום:
+לא מסתדר? לחץ כאן:
 ${declineLink}`;
         }
 
-        await client.messages.create({
-            from: FROM,
-            to: formatPhoneNumber(to), 
-            body: messageBody,
-        });
-        console.log(`SMS (Reminder: ${isReminder}) נשלחה אל ${to} עבור הרשמה ${registrationId}`);
-    } catch (err) {
-        if (err.status === 404) {
-            throw err;
-        }
-        console.error('שגיאה בשליחת SMS:', err.message);
-    }
+        // --- בניית ה-JSON ---
+        const payload = {
+            sms: {
+                user: {
+                    username: process.env.SMS_019_USER,
+                    password: process.env.SMS_019_PASSWORD
+                },
+                source: process.env.SMS_019_SENDER, // נשאר קבוע: AZTODEV
+                destinations: {
+                    phone: formatPhoneNumber(to)
+                },
+                message: messageBody
+            }
+        };
+
+        console.log(`📤 שולח SMS ל-${to} (עבור ${studioName})...`);
+
+        const response = await axios.post(API_URL, payload, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = response.data;
+        
+        if (data.status === 0 || data.status === '0') {
+            console.log(`✅ SMS נשלח בהצלחה!`);
+        } else {
+            console.error(`❌ שגיאת 019: ${data.status} - ${data.message}`);
+        }
+
+    } catch (err) {
+        console.error('❌ שגיאת רשת/שרת:', err.message);
+    }
 }
 
 function formatPhoneNumber(phone) {
-    if (phone.startsWith('0')) {
-        return '+972' + phone.slice(1);
-    }
-    if (!phone.startsWith('+')) {
-        return '+' + phone;
-    }
-    return phone;
+    if (phone.startsWith('0')) return '972' + phone.slice(1);
+    if (phone.startsWith('+')) return phone.slice(1);
+    return phone;
 }
 
 module.exports = { sendSmsWithConfirmLink };
