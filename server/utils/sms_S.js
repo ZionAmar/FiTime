@@ -12,9 +12,9 @@ async function sendSmsWithConfirmLink(to, meetingId, registrationId, isReminder 
             return;
         }
 
-        // כאן הקסם: לוקחים את שם הסטודיו מה-DB, או כותבים "הסטודיו" אם אין שם
         const studioName = meeting.studio_name || 'הסטודיו';
-
+        
+        // תאריך ושעה (04/02 18:00)
         const meetingDate = new Date(meeting.date).toLocaleDateString('he-IL', {day: '2-digit', month: '2-digit'});
         const meetingTime = meeting.start_time.slice(0, 5);
         
@@ -23,39 +23,26 @@ async function sendSmsWithConfirmLink(to, meetingId, registrationId, isReminder 
 
         let messageBody = '';
 
-        // --- עיצוב ההודעה עם שם הסטודיו ---
+        // --- גרסה מאוזנת (נראית טוב, עלות: 2 הודעות) ---
         
         if (isReminder) {
-            messageBody = `תזכורת מ-${studioName} ⏳
-שמרנו לך מקום בשיעור ${meeting.name}!
-📅 מתי: ${meetingDate} ב-${meetingTime}
-
-המקום שמור לזמן מוגבל, נא לאשר הגעה:
-✅ לאישור: ${confirmLink}
-
-❌ לביטול: ${declineLink}`;
+            // תזכורת
+            messageBody = `${studioName} ⏳\nתזכורת ל-${meeting.name}\n${meetingDate} ${meetingTime}\n✅ לאישור: ${confirmLink}\n❌ לביטול: ${declineLink}`;
 
         } else {
-            messageBody = `היי, חדשות טובות מ-${studioName}! 🥳
-התפנה מקום בשיעור שרצית: ${meeting.name}
-📅 מתי: ${meetingDate} ב-${meetingTime}
-
-רוצה להצטרף?
-✅ לחץ לאישור מיידי:
-${confirmLink}
-
-לא מסתדר? לחץ כאן:
-${declineLink}`;
+            // רשימת המתנה - החזרנו את האימוג'י ואת שם השיעור
+            messageBody = `${studioName} 🥳\nהתפנה מקום ב-${meeting.name}!\n${meetingDate} ${meetingTime}\n✅ לאישור: ${confirmLink}\n❌ לביטול: ${declineLink}`;
         }
 
-        // --- בניית ה-JSON ---
+        // --- סוף גרסה ---
+
         const payload = {
             sms: {
                 user: {
                     username: process.env.SMS_019_USER,
                     password: process.env.SMS_019_PASSWORD
                 },
-                source: process.env.SMS_019_SENDER, // נשאר קבוע: AZTODEV
+                source: process.env.SMS_019_SENDER,
                 destinations: {
                     phone: formatPhoneNumber(to)
                 },
@@ -63,7 +50,8 @@ ${declineLink}`;
             }
         };
 
-        console.log(`📤 שולח SMS ל-${to} (עבור ${studioName})...`);
+        // לוג שיעזור לך לעקוב אחרי האורך
+        console.log(`📤 שולח SMS ל-${to}. אורך: ${messageBody.length} תווים.`);
 
         const response = await axios.post(API_URL, payload, {
             headers: { 'Content-Type': 'application/json' }
@@ -83,9 +71,11 @@ ${declineLink}`;
 }
 
 function formatPhoneNumber(phone) {
-    if (phone.startsWith('0')) return '972' + phone.slice(1);
-    if (phone.startsWith('+')) return phone.slice(1);
-    return phone;
+    if (!phone) return '';
+    let p = phone.replace(/\D/g, ''); 
+    if (p.startsWith('0')) return '972' + p.slice(1);
+    if (p.startsWith('972')) return p;
+    return '972' + p; 
 }
 
 module.exports = { sendSmsWithConfirmLink };
