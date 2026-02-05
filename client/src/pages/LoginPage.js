@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import LandingPageHeader from '../components/LandingPageHeader';
@@ -27,28 +27,38 @@ function LoginPage() {
         }
     };
 
+    useEffect(() => {
+        // 1. ניסיון לשלוף נתוני משתמש מהזיכרון המקומי של הדפדפן
+        const user = localStorage.getItem('activeRole');
+
+        // 2. אם נמצא משתמש (כלומר, הוא התחבר בעבר ולא עשה Logout)
+        if (user) {
+            // 3. בצע ניתוב מחדש (Redirect) ישירות לדשבורד
+            navigate('/dashboard', { replace: true });
+        }
+    }, [navigate]);
     return (
         <div className="page-wrapper">
-            <LandingPageHeader simplified /> 
+            <LandingPageHeader simplified />
             <main className="auth-page">
                 <div className="auth-form-side">
                     <div className="form-container">
                         <h2>כניסת משתמש</h2>
                         <form onSubmit={handleSubmit}>
-                            <input 
-                                type="text" 
-                                placeholder="שם משתמש" 
-                                value={userName} 
-                                onChange={(e) => setUserName(e.target.value)} 
-                                required 
+                            <input
+                                type="text"
+                                placeholder="שם משתמש"
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                                required
                                 disabled={isLoading}
                             />
-                            <input 
-                                type="password" 
-                                placeholder="סיסמה" 
-                                value={pass} 
-                                onChange={(e) => setPass(e.target.value)} 
-                                required 
+                            <input
+                                type="password"
+                                placeholder="סיסמה"
+                                value={pass}
+                                onChange={(e) => setPass(e.target.value)}
+                                required
                                 disabled={isLoading}
                             />
                             {error && <p className="error">{error}</p>}
@@ -57,7 +67,7 @@ function LoginPage() {
                             </button>
                         </form>
                         <div>
-                          <Link to="/forgot-password">שכחתי סיסמה</Link>
+                            <Link to="/forgot-password">שכחתי סיסמה</Link>
                         </div>
                         <p className="auth-switch">
                             עדיין אין לך חשבון? <Link to="/register">הירשם</Link>
