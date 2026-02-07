@@ -1,26 +1,29 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute'; 
+import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Breadcrumbs from './components/Breadcrumbs';
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import SchedulePage from './pages/SchedulePage'; 
-import MemberHistoryPage from './pages/MemberHistoryPage';
-import TrainerHistoryPage from './pages/TrainerHistoryPage';
-import ManageSchedulePage from './pages/ManageSchedulePage'; 
-import BookingConfirmedPage from './pages/BookingConfirmedPage';
-import BookingErrorPage from './pages/BookingErrorPage';
-import OwnerDashboardPage from './pages/OwnerDashboardPage';
-import ForgotPassword from './pages/ForgotPassword'; 
-import ResetPassword from './pages/ResetPassword'; 
-import MyMembershipsPage from './pages/MyMembershipsPage'; 
 import './App.css';
 import 'react-datepicker/dist/react-datepicker.css';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const SchedulePage = lazy(() => import('./pages/SchedulePage'));
+const MemberHistoryPage = lazy(() => import('./pages/MemberHistoryPage'));
+const TrainerHistoryPage = lazy(() => import('./pages/TrainerHistoryPage'));
+const ManageSchedulePage = lazy(() => import('./pages/ManageSchedulePage'));
+const BookingConfirmedPage = lazy(() => import('./pages/BookingConfirmedPage'));
+const BookingErrorPage = lazy(() => import('./pages/BookingErrorPage'));
+const OwnerDashboardPage = lazy(() => import('./pages/OwnerDashboardPage'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const MyMembershipsPage = lazy(() => import('./pages/MyMembershipsPage'));
+
+const PageFallback = () => <div className="loading" aria-live="polite">טוען...</div>;
 
 const AppRoutes = () => {
     const { isLoading } = useAuth();
@@ -30,6 +33,7 @@ const AppRoutes = () => {
     }
 
     return (
+        <Suspense fallback={<PageFallback />}>
         <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -62,8 +66,9 @@ const AppRoutes = () => {
                     <p>אין לך הרשאה לגשת לדף המבוקש.</p>
                 </div>
             } />
-            <Route path="*" element={<Navigate to="/" replace />} /> 
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
     );
 };
 

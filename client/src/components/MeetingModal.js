@@ -374,30 +374,27 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
 
                         {/* אזור השיעורים החוזרים - מוצג רק ביצירה חדשה */}
                         {!isEditMode && (
-                            <div className="recurrence-section" style={{ background: '#f8f9fa', padding: '15px', borderRadius: '8px', marginTop: '15px', marginBottom: '15px', border: '1px solid #e9ecef' }}>
+                            <div className="recurrence-section">
                                 <div style={{ marginBottom: '10px' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontWeight: 'bold' }}>
+                                    <label className="recurrence-checkbox-label">
                                         <input
                                             type="checkbox"
                                             name="isRecurring"
                                             checked={formData.isRecurring}
                                             onChange={handleChange}
-                                            style={{ marginLeft: '10px', width: 'auto' }}
                                         />
                                         קבע כשיעור קבוע (סדרה)
                                     </label>
                                 </div>
 
                                 {formData.isRecurring && (
-                                    <div className="recurrence-options" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div className="recurrence-options">
                                         <div className="form-field">
                                             <label>תדירות</label>
                                             <select
                                                 name="recurrenceType"
                                                 value={formData.recurrenceType}
                                                 onChange={handleChange}
-                                                className="form-control"
-                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                                             >
                                                 <option value="weekly">כל שבוע (באותו יום)</option>
                                                 <option value="biweekly">כל שבועיים</option>
@@ -413,7 +410,6 @@ function MeetingModal({ meeting, onSave, onClose, initialData, operatingHours })
                                                 onChange={handleChange}
                                                 min={formData.date}
                                                 required={formData.isRecurring}
-                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                                             />
                                         </div>
                                     </div>

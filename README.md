@@ -117,7 +117,13 @@ To get a local copy up and running, follow these simple steps.
     # JWT Configuration
     jwtSecret=your_super_secret_jwt_key
     salt=your_secret_salt_for_passwords
+
+    # Optional: for high traffic / many users (defaults: 25 connections, queue 50)
+    # DB_POOL_SIZE=25
+    # DB_QUEUE_LIMIT=50
     ```
+
+    **Optional — Performance indexes:** For installations with many users and meetings, run `performance_indexes.sql` once on your database to add indexes that speed up schedule and list queries. If you get "Duplicate key name" errors, the indexes already exist.
 
 6.  **Run the application:**
     -   **Start the backend server:** In the `server` directory, run:

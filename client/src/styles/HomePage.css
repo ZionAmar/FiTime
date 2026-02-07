@@ -1,33 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;800&display=swap');
-
-/* --- משתנים ועיצוב בסיסי --- */
-:root {
-  --primary-color: #6366f1; /* Indigo */
-  --primary-dark: #4338ca;
-  --secondary-color: #10b981; /* Emerald */
-  --secondary-dark: #059669;
-  --accent-color: #f59e0b; /* Amber */
-  --dark-color: #0f172a; /* Slate 900 */
-  --text-color: #334155; /* Slate 700 */
-  --light-bg: #f8fafc;
-  --white: #ffffff;
-  --gradient-overlay: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(67, 56, 202, 0.85) 100%);
-  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --radius-lg: 1rem;
-}
+/* --- דף נחיתה משתמש במשתני האפליקציה מ-App.css (primary, secondary, dark-color וכו') --- */
 
 /* איפוס קריטי למניעת שבירת עיצוב */
-*, *::before, *::after {
+.landing-page-v6 *,
+.landing-page-v6 *::before,
+.landing-page-v6 *::after {
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Rubik', sans-serif;
-  color: var(--text-color);
-  background-color: var(--light-bg);
-  margin: 0;
-  padding: 0;
+.landing-page-v6 {
+  font-family: var(--font-family);
+  color: var(--dark-color);
+  background-color: var(--bg-color);
   direction: rtl;
   line-height: 1.6;
 }
@@ -53,14 +36,14 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   padding: 120px 20px 60px;
-  color: var(--white);
-  overflow: hidden; /* ב-Hero זה בסדר כי אין אלמנטים בולטים החוצה */
+  color: var(--card-bg-color);
+  overflow: hidden;
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: var(--gradient-overlay);
+  background: linear-gradient(135deg, rgba(61, 64, 91, 0.94) 0%, rgba(124, 154, 146, 0.88) 100%);
   z-index: 1;
 }
 
@@ -76,17 +59,17 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   padding: 8px 24px;
   border-radius: 50px;
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   margin-bottom: 30px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 .launch-badge-text {
-  color: #ffd700;
+  color: var(--light-color);
   font-weight: 600;
   font-size: 1rem;
 }
@@ -118,13 +101,13 @@ body {
 .animated-text {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--secondary-color);
+  color: var(--light-color);
   text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .hero-cta-button {
-  background: var(--secondary-color);
-  color: var(--white);
+  background: var(--primary-color);
+  color: white;
   padding: 16px 40px;
   font-size: 1.2rem;
   font-weight: 700;
@@ -132,21 +115,21 @@ body {
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 15px rgba(124, 154, 146, 0.45);
   display: inline-block;
   text-decoration: none;
 }
 
 .hero-cta-button:hover {
-  background: var(--secondary-dark);
+  background: #8FB0A8;
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 8px 25px rgba(124, 154, 146, 0.5);
 }
 
 /* --- FEATURES GRID --- */
 .features-section {
   padding: 80px 0;
-  background: var(--white);
+  background: var(--card-bg-color);
 }
 
 .section-title {
@@ -165,18 +148,18 @@ body {
 }
 
 .feature-card {
-  background: var(--light-bg);
+  background: var(--bg-color);
   padding: 40px 30px;
-  border-radius: var(--radius-lg);
-  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
   text-align: center;
 }
 
 .feature-card:hover {
   transform: translateY(-5px);
-  background: var(--white);
-  box-shadow: var(--shadow-hover);
+  background: var(--card-bg-color);
+  box-shadow: var(--shadow-lg);
   border-color: var(--primary-color);
 }
 
@@ -194,17 +177,17 @@ body {
 }
 
 .feature-card p {
-  color: #64748b;
+  color: var(--dark-color);
+  opacity: 0.85;
   font-size: 1rem;
 }
 
 /* --- OWNER / DEEP DIVE SECTION (החלק שתוקן) --- */
 .owner-section {
   position: relative;
-  padding: 120px 0; /* ריווח גדול למניעת חיתוך */
-  background: #f1f5f9;
+  padding: 120px 0;
+  background: var(--bg-color);
   z-index: 5;
-  /* overflow: hidden - הוסר! */
 }
 
 .owner-content-wrapper {
@@ -220,8 +203,8 @@ body {
 }
 
 .tag-label {
-  background: #e0e7ff;
-  color: var(--primary-dark);
+  background: rgba(124, 154, 146, 0.2);
+  color: var(--primary-color);
   font-weight: 700;
   font-size: 0.85rem;
   padding: 6px 16px;
@@ -239,6 +222,19 @@ body {
   line-height: 1.2;
 }
 
+.owner-paragraph {
+  font-size: 1.1rem;
+  color: var(--dark-color);
+  opacity: 0.9;
+}
+
+.pricing-disclaimer {
+  margin-top: 15px;
+  font-size: 0.8rem;
+  color: var(--dark-color);
+  opacity: 0.7;
+}
+
 .check-list {
   list-style: none;
   padding: 0;
@@ -252,12 +248,12 @@ body {
   margin-bottom: 15px;
   font-size: 1.1rem;
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--dark-color);
 }
 
 .check-mark {
-  color: var(--secondary-color);
-  background: #d1fae5;
+  color: var(--primary-color);
+  background: rgba(124, 154, 146, 0.25);
   width: 28px;
   height: 28px;
   display: flex;
@@ -308,7 +304,7 @@ body {
 /* --- PRICING SECTION --- */
 .pricing-section {
   padding: 100px 0;
-  background: var(--white);
+  background: var(--card-bg-color);
 }
 
 .pricing-card-container {
@@ -318,13 +314,13 @@ body {
 }
 
 .pricing-card {
-  background: var(--white);
+  background: var(--card-bg-color);
   border-radius: 24px;
   padding: 40px;
   text-align: center;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   border: 2px solid transparent;
-  background-image: linear-gradient(var(--white), var(--white)), linear-gradient(to bottom right, var(--secondary-color), var(--primary-color));
+  background-image: linear-gradient(var(--card-bg-color), var(--card-bg-color)), linear-gradient(to bottom right, var(--secondary-color), var(--primary-color));
   background-origin: border-box;
   background-clip: content-box, border-box;
   position: relative;
@@ -335,7 +331,7 @@ body {
   top: -16px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(90deg, #10b981, #059669);
+  background: linear-gradient(90deg, var(--primary-color), #8FB0A8);
   color: white;
   padding: 6px 20px;
   border-radius: 20px;
@@ -355,22 +351,24 @@ body {
 }
 
 .price-period {
-  color: #64748b;
+  color: var(--dark-color);
+  opacity: 0.8;
   font-size: 1.1rem;
 }
 
 .old-price {
   text-decoration: line-through;
-  color: #94a3b8;
+  color: var(--dark-color);
+  opacity: 0.6;
   margin-top: 5px;
   display: block;
 }
 
 .gift-text {
-  color: var(--secondary-dark);
+  color: var(--secondary-color);
   font-weight: 700;
   margin: 15px 0 30px;
-  background: #ecfdf5;
+  background: rgba(161, 130, 118, 0.15);
   padding: 10px;
   border-radius: 8px;
 }
@@ -392,28 +390,31 @@ body {
   display: block;
   width: 100%;
   padding: 15px;
-  background: var(--dark-color);
+  background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-block:hover {
-  background: black;
+  background: #8FB0A8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(124, 154, 146, 0.35);
 }
 
 /* --- FOOTER --- */
 .lp-footer {
   background: var(--dark-color);
-  color: #94a3b8;
+  color: var(--light-color);
+  opacity: 0.9;
   padding: 40px 0;
   text-align: center;
   font-size: 0.9rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--border-color);
 }
 
 /* --- ANIMATION --- */

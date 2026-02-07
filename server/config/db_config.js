@@ -34,7 +34,8 @@ const currentOffset = getIsraelOffset();
 console.log(`🌍 חיבור ל-DB ב-ChemiCloud הוגדר עם אזור זמן: ${currentOffset}`);
 
 const pool = mysql.createPool({
-    connectionLimit: 10,
+    connectionLimit: parseInt(process.env.DB_POOL_SIZE, 10) || 25,
+    queueLimit: parseInt(process.env.DB_QUEUE_LIMIT, 10) || 50,
     host: process.env.HOST,
     user: process.env.USER_DB,
     password: process.env.PASSWORD,
@@ -42,7 +43,7 @@ const pool = mysql.createPool({
     port: process.env.PORT_DB,
     waitForConnections: true,
     dateStrings: true,
-    timezone: currentOffset // <--- הנה הקסם
+    timezone: currentOffset
 });
 
 module.exports = pool.promise();

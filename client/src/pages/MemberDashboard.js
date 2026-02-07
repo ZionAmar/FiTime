@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -49,7 +49,7 @@ const SessionDetailsModal = ({ session, isOpen, onClose, onCancel, showCancelBut
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <button className="modal-close-button" onClick={onClose}>&times;</button>
+                <button className="modal-close-btn" onClick={onClose}>&times;</button>
                 <h2>פרטי השיעור</h2>
                 <h3>{session.name}</h3>
                 {cancelError && <p className="error" style={{ color: '#dc3545', fontWeight: 'bold' }}>שגיאה בביטול: {cancelError}</p>}
@@ -92,12 +92,12 @@ function MemberDashboard() {
         setListError(null);
     };
 
-    const fetchMeetings = async () => {
+    const fetchMeetings = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         resetListMessages();
         try {
-            const data = await api.get('/api/meetings?viewAs=member'); 
+            const data = await api.get('/api/meetings?viewAs=member');
             if (Array.isArray(data)) {
                 const processedMeetings = data.map(m => ({ ...m, start: new Date(m.start), end: new Date(m.end) }));
                 setMyMeetings(processedMeetings);
@@ -110,7 +110,7 @@ function MemberDashboard() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (user && activeStudio) {
@@ -118,7 +118,7 @@ function MemberDashboard() {
         } else {
             setIsLoading(false);
         }
-    }, [user, activeStudio]);
+    }, [user, activeStudio, fetchMeetings]);
     
     const performCancel = async (registrationId, origin) => {
         closeConfirmModal();

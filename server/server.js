@@ -1,16 +1,18 @@
 const express = require("express");
+const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs");
 const errorHandler = require("./middlewares/errorHandler");
 const cors = require("cors");
-const participantService = require('./services/participant_S'); // 1. ודא שהסרוויס מיובא
+const participantService = require('./services/participant_S');
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4060;
 
+app.use(compression());
 app.use(cors({
   origin: ["http://localhost:3000","https://fitime.co.il"],
   credentials: true

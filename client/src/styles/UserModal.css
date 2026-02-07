@@ -17,7 +17,8 @@
 .form-field {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 8px;
+    align-items: flex-start;
 }
 
 .form-field label {
@@ -50,6 +51,34 @@
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(124, 154, 146, 0.2);
+}
+
+/* שדה תופס את השטח הנותר בשורה (מאמן, חדר, תאריך וכו') - לא צ'קבוקס */
+.form-field input:not([type="checkbox"]),
+.form-field select,
+.form-field .multiselect-container {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-field label {
+    flex-shrink: 0;
+    min-width: 100px;
+}
+
+/* שורת צ'קבוקס (חדר: זמין / ציוד) */
+.form-field.checkbox-row {
+    align-items: center;
+}
+
+.form-field.checkbox-row label {
+    min-width: 0;
+    order: 1;
+}
+
+.form-field.checkbox-row input[type="checkbox"] {
+    flex: none;
+    width: auto;
 }
 
 /* Footer Actions */
@@ -151,6 +180,42 @@
     margin-bottom: 0;
     padding-bottom: 0;
 }
+
+/* אזור שיעור חוזר (מודל מפגש) */
+.recurrence-section {
+    background: var(--bg-color);
+    padding: var(--spacing-lg, 1rem);
+    border-radius: var(--radius-md, 8px);
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.recurrence-section .recurrence-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg, 1rem);
+}
+
+.recurrence-section label.recurrence-checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.recurrence-section label.recurrence-checkbox-label input[type="checkbox"] {
+    margin-left: 10px;
+    width: auto;
+    flex: none;
+}
+
+@media (max-width: 500px) {
+    .recurrence-section .recurrence-options {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* UserModal.css - הוסף את הקוד הזה בתחתית הקובץ */
 
 /* --- כללי מובייל קריטיים --- */
@@ -164,18 +229,24 @@
         padding: 20px;
     }
     
-    /* 2. שדות הטופס: הופכים לשורות */
-    .user-form .form-field, 
-    .add-membership-form .form-field {
-        flex-direction: column; /* 🚨 הופך לשדות עמודה */
-        gap: 8px; /* מגדיל רווח אנכי */
+    /* 2. שדות הטופס: הופכים לשורות (כולל מודל שיעור/מפגש והגדרות) */
+    .user-form .form-field,
+    .add-membership-form .form-field,
+    .settings-form .form-field {
+        flex-direction: column;
+        gap: 8px;
     }
 
     /* 3. שדות הטופס: תופסים 100% רוחב */
-    .form-field input, 
-    .form-field select {
+    .form-field input,
+    .form-field select,
+    .form-field .multiselect-container {
         width: 100%;
-        box-sizing: border-box; /* חשוב לשמירת גודל בתוך הפדינג */
+        box-sizing: border-box;
+    }
+
+    .settings-form .form-field label {
+        min-width: 0;
     }
 
     /* 4. כפתורי הפוטר: מותחים את המודל לרוחב מלא */

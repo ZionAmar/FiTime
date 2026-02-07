@@ -117,7 +117,7 @@ function HomePage() {
               <div className="owner-text">
                 <span className="tag-label">החלק האהוב על המנהלים</span>
                 <h2 className="owner-title">ניהול מנויים וכרטיסיות ללא כאב ראש</h2>
-                <p style={{ fontSize: '1.1rem', color: '#475569' }}>
+                <p className="owner-paragraph">
                   החלק הכי מתסכל בניהול סטודיו הוא המעקב אחרי ניקובים ("כמה נשאר לי?").
                   ב-FiTime, המערכת סופרת את הניקובים אוטומטית וחוסמת רישום כשנגמרת הכרטיסייה.
                 </p>
@@ -169,7 +169,7 @@ function HomePage() {
                 <button className="btn-block" onClick={() => navigate('/register')}>
                   אני רוצה להצטרף בחינם
                 </button>
-                <p style={{ marginTop: '15px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                <p className="pricing-disclaimer">
                   ההרשמה לוקחת דקה. אין צורך בפרטי אשראי.
                 </p>
               </div>
